@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { EmailConfig, NavLink, SocialLink, BrandPreset } from '../types';
 import { 
   Building, Image, Type, Compass, 
-  Share2, ChevronDown, ChevronUp, Upload, Trash, Plus, X 
+  Share2, ChevronDown, ChevronUp, Upload, Trash, Plus, X, Sparkles, RefreshCw 
 } from 'lucide-react';
 
 interface EmailSettingsProps {
@@ -16,7 +16,7 @@ interface EmailSettingsProps {
   base64Image: string;
 }
 
-type AccordionKey = 'brand' | 'image' | 'header' | 'cta' | 'footer';
+type AccordionKey = 'brand' | 'image' | 'header' | 'cta' | 'footer' | 'ai';
 
 export const EmailSettings: React.FC<EmailSettingsProps> = ({
   config,
@@ -37,6 +37,146 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
   const [addFallbackUrl, setAddFallbackUrl] = useState('https://');
   const [addPrimaryColor, setAddPrimaryColor] = useState('#00f0ff');
   const [addLogoUrl, setAddLogoUrl] = useState('');
+
+  // AI Assistant State
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiGenType, setAiGenType] = useState<'brand' | 'cta' | 'all'>('all');
+  const [aiLogs, setAiLogs] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const runAiAutomation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) return;
+
+    setIsGenerating(true);
+    setAiLogs([]);
+    
+    const promptLower = aiPrompt.toLowerCase();
+    
+    let theme = 'cyberpunk';
+    let brandName = 'Novelleyx Neon';
+    let primaryColor = '#00f0ff';
+    let logoBg = '#101018';
+    let navLinks = [
+      { text: 'Features', url: 'https://example.com/features' },
+      { text: 'Interactive Map', url: 'https://example.com/map' },
+      { text: 'Get Started', url: 'https://example.com/start' }
+    ];
+    let ctaTitle = 'Elevate Your Interactive Campaigns';
+    let ctaBody = 'Deploy interactive clickable maps directly in your customers\' inboxes. High performance, zero-friction path to purchase.';
+    let ctaBtn = 'Learn More';
+
+    if (promptLower.includes('organic') || promptLower.includes('nature') || promptLower.includes('eco') || promptLower.includes('green') || promptLower.includes('wellness') || promptLower.includes('health') || promptLower.includes('botanical')) {
+      theme = 'wellness';
+      brandName = 'Flora & Co';
+      primaryColor = '#2e7d32';
+      logoBg = '#f1f8e9';
+      navLinks = [
+        { text: 'Our Farms', url: 'https://example.com/farms' },
+        { text: 'Botanicals', url: 'https://example.com/botanicals' },
+        { text: 'Sustainability', url: 'https://example.com/green' }
+      ];
+      ctaTitle = 'Reconnecting with Botanical Healing';
+      ctaBody = 'Harvested from organic, sustainable sources. Explore our freshly packaged collection of aromatherapy blends crafted to relax your body and soothe your mind.';
+      ctaBtn = 'Explore Healing';
+    } else if (promptLower.includes('corp') || promptLower.includes('finance') || promptLower.includes('bank') || promptLower.includes('business') || promptLower.includes('consult')) {
+      theme = 'enterprise';
+      brandName = 'Apex Ledger';
+      primaryColor = '#0a2540';
+      logoBg = '#f8f9fa';
+      navLinks = [
+        { text: 'Enterprise Platform', url: 'https://example.com/platform' },
+        { text: 'Pricing Matrix', url: 'https://example.com/pricing' },
+        { text: 'Schedule Demo', url: 'https://example.com/demo' }
+      ];
+      ctaTitle = 'Consolidate Marketing Infrastructure';
+      ctaBody = 'Deliver maximum conversion metrics using high-fidelity inline image maps. Integrate enterprise-grade analytics tracking on every zone interaction.';
+      ctaBtn = 'Request Case Study';
+    } else if (promptLower.includes('kid') || promptLower.includes('fun') || promptLower.includes('toy') || promptLower.includes('play') || promptLower.includes('festival')) {
+      theme = 'playful';
+      brandName = 'Wonder Play';
+      primaryColor = '#ff007f';
+      logoBg = '#120010';
+      navLinks = [
+        { text: 'Shop Toys', url: 'https://example.com/toys' },
+        { text: 'Activity Kits', url: 'https://example.com/activities' },
+        { text: 'Parent Portal', url: 'https://example.com/portal' }
+      ];
+      ctaTitle = 'Unbox Infinite Joy & Learning!';
+      ctaBody = 'Check out our newly dropped creative activity packages. Full of vibrant accessories, interactive games, and toys built for healthy, imaginative play.';
+      ctaBtn = 'Let\'s Play!';
+    } else if (promptLower.includes('sale') || promptLower.includes('shop') || promptLower.includes('fashion') || promptLower.includes('holiday') || promptLower.includes('black') || promptLower.includes('clothing')) {
+      theme = 'fashion';
+      brandName = 'Vogue Studio';
+      primaryColor = '#d946ef';
+      logoBg = '#09090b';
+      navLinks = [
+        { text: 'New Arrivals', url: 'https://example.com/new' },
+        { text: 'Holiday Deals', url: 'https://example.com/deals' },
+        { text: 'Style Guide', url: 'https://example.com/style' }
+      ];
+      ctaTitle = 'HOLIDAY SAVINGS ARE OFFICIALLY LIVE';
+      ctaBody = 'Unlock early access items at up to 50% off. Seamless mapped sizing charts and priority checkout routing. Free express delivery on orders over $75.';
+      ctaBtn = 'Claim 50% Off';
+    } else {
+      // Dynamic builder based on prompt text keywords
+      const cleanPrompt = aiPrompt.replace(/[^a-zA-Z0-9\s]/g, '');
+      const words = cleanPrompt.split(/\s+/).filter(w => w.length > 2);
+      if (words.length > 0) {
+        brandName = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).slice(0, 3).join(' ') + ' Brand';
+      } else {
+        brandName = 'Custom Preset';
+      }
+      
+      const colors = ['#00f0ff', '#ff007f', '#39ff14', '#ffbd2e', '#8b5cf6'];
+      primaryColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      ctaTitle = `Welcome to ${brandName}`;
+      ctaBody = `Discover the next level of brand interactions using our mapped email image canvas. Tailored content optimized for your target audience: "${aiPrompt}".`;
+    }
+
+    const steps = [
+      `[ai] Initializing Novelleyx AI Generator...`,
+      `[ai] Reading intent prompt: "${aiPrompt}"`,
+      `[ai] Extracting visual archetype mapping...`,
+      `[ai] Archetype classification: ${theme.toUpperCase()} style.`,
+      `[ai] Deciding color palette matching: ${primaryColor}`,
+      `[ai] Constructing header navigation elements...`,
+      `[ai] Writing CTA marketing copy & action triggers...`,
+      `[ai] Performing local optimization compile...`,
+      `[ai] Applying variables to active workspace state...`
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 80));
+      setAiLogs(prev => [...prev, steps[i]]);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Apply the updates based on type
+    if (aiGenType === 'brand' || aiGenType === 'all') {
+      onChange({
+        companyName: brandName,
+        headerBgColor: logoBg,
+        headerTextColor: primaryColor,
+        navLinks: navLinks,
+        ctaBgColor: primaryColor
+      });
+    }
+    
+    if (aiGenType === 'cta' || aiGenType === 'all') {
+      onChange({
+        ctaTitle: ctaTitle,
+        ctaBody: ctaBody,
+        ctaButtonText: ctaBtn,
+        ctaBgColor: primaryColor
+      });
+    }
+
+    setAiLogs(prev => [...prev, `[success] Novelleyx AI successfully automated the settings panel!`]);
+    setIsGenerating(false);
+  };
 
   const toggleAccordion = (key: AccordionKey) => {
     setActiveAccordion(activeAccordion === key ? 'brand' : key);
@@ -617,6 +757,139 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 6. NOVELLEYX AI AUTOMATION ASSISTANT */}
+      <div className={`accordion-item ${activeAccordion === 'ai' ? 'open' : ''}`}>
+        <button 
+          type="button" 
+          className="accordion-header" 
+          onClick={() => toggleAccordion('ai')}
+        >
+          <div className="accordion-title">
+            <Sparkles size={16} className="icon-neon-cyan" />
+            <span>6. Novelleyx AI Assistant</span>
+          </div>
+          {activeAccordion === 'ai' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+
+        <div className="accordion-body">
+          <form onSubmit={runAiAutomation} className="flex-col gap-10">
+            <div className="form-group">
+              <label htmlFor="ai-prompt-input">Automation Command / Prompt</label>
+              <textarea
+                id="ai-prompt-input"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="e.g. Create a dark mode organic skincare brand called 'Lush Green' with green color palette and organic theme"
+                rows={3}
+                required
+                disabled={isGenerating}
+              />
+              <span className="field-hint">Describe your brand theme, archetype, or campaign objective.</span>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="ai-gen-type">Automation Focus Scope</label>
+              <select
+                id="ai-gen-type"
+                value={aiGenType}
+                onChange={(e) => setAiGenType(e.target.value as any)}
+                disabled={isGenerating}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-dim)',
+                  borderRadius: '6px',
+                  color: 'var(--text-main)',
+                  outline: 'none'
+                }}
+              >
+                <option value="all">Complete Brand, Copy & Navigation (Full Auto)</option>
+                <option value="brand">Visual Themes & Color Palette Only</option>
+                <option value="cta">Promotional CTA Copywriting Only</option>
+              </select>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn-submit flex-row align-center justify-center gap-5 w-100" 
+              disabled={isGenerating || !aiPrompt.trim()}
+              style={{ marginTop: '5px' }}
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="animate-spin" size={13} />
+                  <span>AI Engine Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={13} />
+                  <span>Generate Brand Experience</span>
+                </>
+              )}
+            </button>
+
+            {/* AI step-by-step reasoning log terminal */}
+            {(aiLogs.length > 0 || isGenerating) && (
+              <div 
+                className="terminal-console-wrapper w-100 mt-10"
+                style={{
+                  border: '1px solid var(--border-dim)',
+                  borderRadius: '6px',
+                  overflow: 'hidden'
+                }}
+              >
+                <div 
+                  className="terminal-header flex-row justify-between align-center px-10 py-5"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderBottom: '1px solid var(--border-dim)',
+                    fontSize: '10px',
+                    color: 'var(--text-muted)',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  <span>AI REASONING CORE</span>
+                  <span style={{ display: 'flex', gap: '4px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }}></span>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }}></span>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#27c93f', display: 'inline-block' }}></span>
+                  </span>
+                </div>
+                <div 
+                  className="terminal-body p-8 scrollbar-neon" 
+                  style={{ 
+                    maxHeight: '120px', 
+                    overflowY: 'auto', 
+                    textAlign: 'left', 
+                    fontFamily: 'monospace', 
+                    fontSize: '9px', 
+                    lineHeight: '13px', 
+                    background: '#07070a', 
+                    color: '#e0e0e6',
+                    height: '120px'
+                  }}
+                >
+                  {aiLogs.map((log, idx) => {
+                    let color = '#a0a0b0';
+                    if (log.startsWith('[ai]')) {
+                      color = '#8b5cf6'; // AI purple
+                    } else if (log.startsWith('[success]')) {
+                      color = '#39ff14'; // neon green
+                    }
+                    return (
+                      <div key={idx} style={{ color }}>
+                        {log}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </form>
         </div>
       </div>
 

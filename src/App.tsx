@@ -7,7 +7,7 @@ import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
 import { SendEmailModal } from './components/SendEmailModal';
 import { generateEmailHtml, generateImageMapOnlyHtml } from './utils/emailGenerator';
-import { Sparkles, Layers } from 'lucide-react';
+import { Sparkles, Layers, BookOpen } from 'lucide-react';
 
 // Default mock image for instant WOW factor when loading the editor
 const DEFAULT_PRESET_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
@@ -287,7 +287,33 @@ export const App: React.FC = () => {
           <Sparkles className="icon-neon-cyan bounce-subtle" size={24} />
           <h1>Novelleyx Email Engine <span className="logo-pro-badge">PRO</span></h1>
         </div>
-        <div className="branding-nav">
+        <div className="branding-nav" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <a 
+            href={import.meta.env.BASE_URL + 'user_guide.html'} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="btn-submit"
+            style={{
+              padding: '6px 12px',
+              fontSize: '11px',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '4px',
+              background: 'linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.15))',
+              border: '1px solid var(--neon-cyan)',
+              color: 'var(--neon-cyan)',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <BookOpen size={12} />
+            <span>User Guide (PDF)</span>
+          </a>
           <span className="current-preset-indicator">
             <Layers size={14} /> Profile: <strong>{config.companyName}</strong>
           </span>

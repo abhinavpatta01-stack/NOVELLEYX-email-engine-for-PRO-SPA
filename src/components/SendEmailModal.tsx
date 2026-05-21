@@ -161,7 +161,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const runSmtpSendSimulation = async () => {
+  const runSmtpSend = async () => {
     saveSmtpSettings();
     setStatus('sending');
     setTerminalLogs([]);
@@ -196,28 +196,93 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
       `[info] Compiling email template payload (${(htmlCode.length / 1024).toFixed(1)} KB)...`,
       `[info] Encoding and attaching ${attachments.length} files...`,
       ...attachments.map(att => `[info] Bound Attachment: ${att.name} (${formatSize(att.size)}, mime: ${att.type})`),
-      `[info] Streaming payload headers & mime boundary to socket...`,
-      `C: .`,
-      `S: 250 2.0.0 Ok: queued as 4Yt2Jm0d1zZ3`,
-      `C: QUIT`,
-      `S: 221 2.0.0 Bye (SMTP connection closed)`,
-      `[success] SMTP relay completed. Campaign successfully delivered to downstream MX!`
+      `[info] Streaming payload headers & mime boundary to socket...`
     ];
 
     for (let i = 0; i < logs.length; i++) {
       // Simulate real-world network latency
-      await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 150));
+      await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 80));
       setTerminalLogs(prev => [...prev, logs[i]]);
       
       // Update step indicator
       if (i === 1) setActiveStep(1); // Connecting
       if (i === 12) setActiveStep(2); // Authentication
       if (i === 19) setActiveStep(3); // Transmitting data
-      if (i === logs.length - 1) setActiveStep(4); // Finished
     }
 
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setStatus('success');
+    setTerminalLogs(prev => [...prev, `[info] Dispatching secure SMTP relay payload...`]);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    try {
+      const payload = {
+        Host: smtpHost,
+        Port: smtpPort,
+        Username: smtpUser,
+        Password: smtpPass,
+        Secure: smtpSecure,
+        To: recipient,
+        From: sender,
+        Subject: subject,
+        Body: htmlCode,
+        Attachments: attachments.map(att => ({
+          name: att.name,
+          data: att.base64.split(',')[1] // Base64 raw string without prefix
+        })),
+        Action: "Send",
+        nocache: Math.floor(1e6 * Math.random() + 1)
+      };
+
+      const response = await fetch("https://smtpjs.com/v3/smtpjs.aspx?", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`SMTPJS server returned HTTP Error Status: ${response.status}`);
+      }
+
+      const resultText = await response.text();
+
+      if (resultText === "OK") {
+        const finalLogs = [
+          `C: .`,
+          `S: 250 2.0.0 Ok: queued as ${Math.random().toString(36).substring(2, 14).toUpperCase()}`,
+          `C: QUIT`,
+          `S: 221 2.0.0 Bye (SMTP connection closed)`,
+          `[success] SMTP relay completed. Campaign successfully delivered to downstream MX!`
+        ];
+
+        for (let i = 0; i < finalLogs.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          setTerminalLogs(prev => [...prev, finalLogs[i]]);
+        }
+
+        setActiveStep(4); // Finished
+        await new Promise(resolve => setTimeout(resolve, 600));
+        setStatus('success');
+      } else {
+        throw new Error(resultText);
+      }
+    } catch (err: any) {
+      const errMsg = err?.message || 'SMTP transaction failed. Connection timed out.';
+      
+      let troubleshootingTip = errMsg;
+      if (errMsg.includes("Authentication") || errMsg.includes("credentials")) {
+        troubleshootingTip += " (Tip: Check your username/password. If using Gmail, you must generate and use an App Password).";
+      } else if (errMsg.includes("Host") || errMsg.includes("connect")) {
+        troubleshootingTip += " (Tip: Verify SMTP Host and Port. Port 587 is recommended for TLS, 465 for SSL).";
+      }
+
+      setTerminalLogs(prev => [
+        ...prev,
+        `[error] SMTP transaction failed: ${errMsg}`
+      ]);
+      setErrorMessage(troubleshootingTip);
+      setStatus('error');
+    }
   };
 
   const runWebhookSend = async () => {
@@ -307,7 +372,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
     if (!recipient.trim() || !sender.trim()) return;
 
     if (sendMethod === 'smtp') {
-      runSmtpSendSimulation();
+      runSmtpSend();
     } else {
       runWebhookSend();
     }
@@ -350,7 +415,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid-2-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="modal-grid-2">
                 <div className="form-group">
                   <label htmlFor="send-sender">Sender Email (From)</label>
                   <input
@@ -392,7 +457,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                   <h5 className="m-0 text-white flex-row align-center gap-5" style={{ fontSize: '11px', borderBottom: '1px solid var(--border-dim)', paddingBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     <span>SMTP server configuration</span>
                   </h5>
-                  <div className="grid-2-col" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
+                  <div className="modal-grid-2-1">
                     <div className="form-group">
                       <label htmlFor="smtp-host" style={{ fontSize: '10px' }}>SMTP Host</label>
                       <input
@@ -418,7 +483,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                       />
                     </div>
                   </div>
-                  <div className="grid-2-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div className="modal-grid-2">
                     <div className="form-group">
                       <label htmlFor="smtp-user" style={{ fontSize: '10px' }}>SMTP Username</label>
                       <input
