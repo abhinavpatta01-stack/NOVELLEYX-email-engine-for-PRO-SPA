@@ -51,131 +51,141 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
     setIsGenerating(true);
     setAiLogs([]);
     
-    const promptLower = aiPrompt.toLowerCase();
-    
-    let theme = 'cyberpunk';
-    let brandName = 'Novelleyx Neon';
-    let primaryColor = '#00f0ff';
-    let logoBg = '#101018';
-    let navLinks = [
-      { text: 'Features', url: 'https://example.com/features' },
-      { text: 'Interactive Map', url: 'https://example.com/map' },
-      { text: 'Get Started', url: 'https://example.com/start' }
-    ];
-    let ctaTitle = 'Elevate Your Interactive Campaigns';
-    let ctaBody = 'Deploy interactive clickable maps directly in your customers\' inboxes. High performance, zero-friction path to purchase.';
-    let ctaBtn = 'Learn More';
+    try {
+      const promptLower = aiPrompt.toLowerCase();
+      
+      let theme = 'cyberpunk';
+      let brandName = 'Novelleyx Neon';
+      let primaryColor = '#00f0ff';
+      let logoBg = '#101018';
+      let navLinks = [
+        { text: 'Features', url: 'https://example.com/features' },
+        { text: 'Interactive Map', url: 'https://example.com/map' },
+        { text: 'Get Started', url: 'https://example.com/start' }
+      ];
+      let ctaTitle = 'Elevate Your Interactive Campaigns';
+      let ctaBody = 'Deploy interactive clickable maps directly in your customers\' inboxes. High performance, zero-friction path to purchase.';
+      let ctaBtn = 'Learn More';
 
-    if (promptLower.includes('organic') || promptLower.includes('nature') || promptLower.includes('eco') || promptLower.includes('green') || promptLower.includes('wellness') || promptLower.includes('health') || promptLower.includes('botanical')) {
-      theme = 'wellness';
-      brandName = 'Flora & Co';
-      primaryColor = '#2e7d32';
-      logoBg = '#f1f8e9';
-      navLinks = [
-        { text: 'Our Farms', url: 'https://example.com/farms' },
-        { text: 'Botanicals', url: 'https://example.com/botanicals' },
-        { text: 'Sustainability', url: 'https://example.com/green' }
-      ];
-      ctaTitle = 'Reconnecting with Botanical Healing';
-      ctaBody = 'Harvested from organic, sustainable sources. Explore our freshly packaged collection of aromatherapy blends crafted to relax your body and soothe your mind.';
-      ctaBtn = 'Explore Healing';
-    } else if (promptLower.includes('corp') || promptLower.includes('finance') || promptLower.includes('bank') || promptLower.includes('business') || promptLower.includes('consult')) {
-      theme = 'enterprise';
-      brandName = 'Apex Ledger';
-      primaryColor = '#0a2540';
-      logoBg = '#f8f9fa';
-      navLinks = [
-        { text: 'Enterprise Platform', url: 'https://example.com/platform' },
-        { text: 'Pricing Matrix', url: 'https://example.com/pricing' },
-        { text: 'Schedule Demo', url: 'https://example.com/demo' }
-      ];
-      ctaTitle = 'Consolidate Marketing Infrastructure';
-      ctaBody = 'Deliver maximum conversion metrics using high-fidelity inline image maps. Integrate enterprise-grade analytics tracking on every zone interaction.';
-      ctaBtn = 'Request Case Study';
-    } else if (promptLower.includes('kid') || promptLower.includes('fun') || promptLower.includes('toy') || promptLower.includes('play') || promptLower.includes('festival')) {
-      theme = 'playful';
-      brandName = 'Wonder Play';
-      primaryColor = '#ff007f';
-      logoBg = '#120010';
-      navLinks = [
-        { text: 'Shop Toys', url: 'https://example.com/toys' },
-        { text: 'Activity Kits', url: 'https://example.com/activities' },
-        { text: 'Parent Portal', url: 'https://example.com/portal' }
-      ];
-      ctaTitle = 'Unbox Infinite Joy & Learning!';
-      ctaBody = 'Check out our newly dropped creative activity packages. Full of vibrant accessories, interactive games, and toys built for healthy, imaginative play.';
-      ctaBtn = 'Let\'s Play!';
-    } else if (promptLower.includes('sale') || promptLower.includes('shop') || promptLower.includes('fashion') || promptLower.includes('holiday') || promptLower.includes('black') || promptLower.includes('clothing')) {
-      theme = 'fashion';
-      brandName = 'Vogue Studio';
-      primaryColor = '#d946ef';
-      logoBg = '#09090b';
-      navLinks = [
-        { text: 'New Arrivals', url: 'https://example.com/new' },
-        { text: 'Holiday Deals', url: 'https://example.com/deals' },
-        { text: 'Style Guide', url: 'https://example.com/style' }
-      ];
-      ctaTitle = 'HOLIDAY SAVINGS ARE OFFICIALLY LIVE';
-      ctaBody = 'Unlock early access items at up to 50% off. Seamless mapped sizing charts and priority checkout routing. Free express delivery on orders over $75.';
-      ctaBtn = 'Claim 50% Off';
-    } else {
-      // Dynamic builder based on prompt text keywords
-      const cleanPrompt = aiPrompt.replace(/[^a-zA-Z0-9\s]/g, '');
-      const words = cleanPrompt.split(/\s+/).filter(w => w.length > 2);
-      if (words.length > 0) {
-        brandName = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).slice(0, 3).join(' ') + ' Brand';
+      if (promptLower.includes('organic') || promptLower.includes('nature') || promptLower.includes('eco') || promptLower.includes('green') || promptLower.includes('wellness') || promptLower.includes('health') || promptLower.includes('botanical')) {
+        theme = 'wellness';
+        brandName = 'Flora & Co';
+        primaryColor = '#2e7d32';
+        logoBg = '#f1f8e9';
+        navLinks = [
+          { text: 'Our Farms', url: 'https://example.com/farms' },
+          { text: 'Botanicals', url: 'https://example.com/botanicals' },
+          { text: 'Sustainability', url: 'https://example.com/green' }
+        ];
+        ctaTitle = 'Reconnecting with Botanical Healing';
+        ctaBody = 'Harvested from organic, sustainable sources. Explore our freshly packaged collection of aromatherapy blends crafted to relax your body and soothe your mind.';
+        ctaBtn = 'Explore Healing';
+      } else if (promptLower.includes('corp') || promptLower.includes('finance') || promptLower.includes('bank') || promptLower.includes('business') || promptLower.includes('consult')) {
+        theme = 'enterprise';
+        brandName = 'Apex Ledger';
+        primaryColor = '#0a2540';
+        logoBg = '#f8f9fa';
+        navLinks = [
+          { text: 'Enterprise Platform', url: 'https://example.com/platform' },
+          { text: 'Pricing Matrix', url: 'https://example.com/pricing' },
+          { text: 'Schedule Demo', url: 'https://example.com/demo' }
+        ];
+        ctaTitle = 'Consolidate Marketing Infrastructure';
+        ctaBody = 'Deliver maximum conversion metrics using high-fidelity inline image maps. Integrate enterprise-grade analytics tracking on every zone interaction.';
+        ctaBtn = 'Request Case Study';
+      } else if (promptLower.includes('kid') || promptLower.includes('fun') || promptLower.includes('toy') || promptLower.includes('play') || promptLower.includes('festival')) {
+        theme = 'playful';
+        brandName = 'Wonder Play';
+        primaryColor = '#ff007f';
+        logoBg = '#120010';
+        navLinks = [
+          { text: 'Shop Toys', url: 'https://example.com/toys' },
+          { text: 'Activity Kits', url: 'https://example.com/activities' },
+          { text: 'Parent Portal', url: 'https://example.com/portal' }
+        ];
+        ctaTitle = 'Unbox Infinite Joy & Learning!';
+        ctaBody = 'Check out our newly dropped creative activity packages. Full of vibrant accessories, interactive games, and toys built for healthy, imaginative play.';
+        ctaBtn = 'Let\'s Play!';
+      } else if (promptLower.includes('sale') || promptLower.includes('shop') || promptLower.includes('fashion') || promptLower.includes('holiday') || promptLower.includes('black') || promptLower.includes('clothing')) {
+        theme = 'fashion';
+        brandName = 'Vogue Studio';
+        primaryColor = '#d946ef';
+        logoBg = '#09090b';
+        navLinks = [
+          { text: 'New Arrivals', url: 'https://example.com/new' },
+          { text: 'Holiday Deals', url: 'https://example.com/deals' },
+          { text: 'Style Guide', url: 'https://example.com/style' }
+        ];
+        ctaTitle = 'HOLIDAY SAVINGS ARE OFFICIALLY LIVE';
+        ctaBody = 'Unlock early access items at up to 50% off. Seamless mapped sizing charts and priority checkout routing. Free express delivery on orders over $75.';
+        ctaBtn = 'Claim 50% Off';
       } else {
-        brandName = 'Custom Preset';
+        // Dynamic builder based on prompt text keywords
+        const cleanPrompt = aiPrompt.replace(/[^a-zA-Z0-9\s]/g, '');
+        const words = cleanPrompt.split(/\s+/).filter(w => w.length > 2);
+        if (words.length > 0) {
+          brandName = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).slice(0, 3).join(' ') + ' Brand';
+        } else {
+          brandName = 'Custom Preset';
+        }
+        
+        const colors = ['#00f0ff', '#ff007f', '#39ff14', '#ffbd2e', '#8b5cf6'];
+        primaryColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        ctaTitle = `Welcome to ${brandName}`;
+        ctaBody = `Discover the next level of brand interactions using our mapped email image canvas. Tailored content optimized for your target audience: "${aiPrompt}".`;
+      }
+
+      const steps = [
+        `[ai] Initializing Novelleyx AI Generator...`,
+        `[ai] Reading intent prompt: "${aiPrompt}"`,
+        `[ai] Extracting visual archetype mapping...`,
+        `[ai] Archetype classification: ${theme.toUpperCase()} style.`,
+        `[ai] Deciding color palette matching: ${primaryColor}`,
+        `[ai] Constructing header navigation elements...`,
+        `[ai] Writing CTA marketing copy & action triggers...`,
+        `[ai] Performing local optimization compile...`,
+        `[ai] Applying variables to active workspace state...`
+      ];
+
+      for (let i = 0; i < steps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 80));
+        setAiLogs(prev => [...prev, steps[i]]);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Apply the consolidated updates in a single call to prevent React state batching races
+      const updates: any = {};
+      if (aiGenType === 'brand' || aiGenType === 'all') {
+        updates.companyName = brandName;
+        updates.headerActive = true;
+        updates.headerBgColor = logoBg;
+        updates.headerTextColor = primaryColor;
+        updates.navLinks = navLinks;
+        updates.ctaBgColor = primaryColor;
+        updates.fallbackUrl = 'https://' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+        updates.ctaButtonUrl = 'https://' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
       }
       
-      const colors = ['#00f0ff', '#ff007f', '#39ff14', '#ffbd2e', '#8b5cf6'];
-      primaryColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      ctaTitle = `Welcome to ${brandName}`;
-      ctaBody = `Discover the next level of brand interactions using our mapped email image canvas. Tailored content optimized for your target audience: "${aiPrompt}".`;
+      if (aiGenType === 'cta' || aiGenType === 'all') {
+        updates.ctaActive = true;
+        updates.ctaTitle = ctaTitle;
+        updates.ctaBody = ctaBody;
+        updates.ctaButtonText = ctaBtn;
+        updates.ctaBgColor = primaryColor;
+        updates.ctaTextColor = '#ffffff';
+      }
+
+      onChange(updates);
+
+      setAiLogs(prev => [...prev, `[success] Novelleyx AI successfully automated the settings panel!`]);
+    } catch (err: any) {
+      console.error(err);
+      setAiLogs(prev => [...prev, `[error] AI engine error: ${err?.message || err}`]);
+    } finally {
+      setIsGenerating(false);
     }
-
-    const steps = [
-      `[ai] Initializing Novelleyx AI Generator...`,
-      `[ai] Reading intent prompt: "${aiPrompt}"`,
-      `[ai] Extracting visual archetype mapping...`,
-      `[ai] Archetype classification: ${theme.toUpperCase()} style.`,
-      `[ai] Deciding color palette matching: ${primaryColor}`,
-      `[ai] Constructing header navigation elements...`,
-      `[ai] Writing CTA marketing copy & action triggers...`,
-      `[ai] Performing local optimization compile...`,
-      `[ai] Applying variables to active workspace state...`
-    ];
-
-    for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 80));
-      setAiLogs(prev => [...prev, steps[i]]);
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Apply the updates based on type
-    if (aiGenType === 'brand' || aiGenType === 'all') {
-      onChange({
-        companyName: brandName,
-        headerBgColor: logoBg,
-        headerTextColor: primaryColor,
-        navLinks: navLinks,
-        ctaBgColor: primaryColor
-      });
-    }
-    
-    if (aiGenType === 'cta' || aiGenType === 'all') {
-      onChange({
-        ctaTitle: ctaTitle,
-        ctaBody: ctaBody,
-        ctaButtonText: ctaBtn,
-        ctaBgColor: primaryColor
-      });
-    }
-
-    setAiLogs(prev => [...prev, `[success] Novelleyx AI successfully automated the settings panel!`]);
-    setIsGenerating(false);
   };
 
   const toggleAccordion = (key: AccordionKey) => {

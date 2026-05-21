@@ -3,14 +3,16 @@
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Premium Cyber Dark Palette */
-  --bg-deep: #050508;
-  --bg-panel: rgba(13, 13, 20, 0.85);
+  /* Premium Cyber Dark Palette inspired by flow waves */
+  --bg-deep: #04020a;
+  --bg-panel: rgba(13, 11, 22, 0.85);
   --bg-input: rgba(255, 255, 255, 0.03);
   --bg-input-focus: rgba(0, 240, 255, 0.05);
   
   --neon-cyan: #00f0ff;
-  --neon-pink: #ff0055;
+  --neon-pink: #d946ef;
+  --neon-orange: #f97316;
+  --neon-purple: #8b5cf6;
   --neon-emerald: #10b981;
   
   --text-primary: #f3f3f6;
@@ -19,10 +21,10 @@
   
   --border-dim: rgba(255, 255, 255, 0.08);
   --border-neon: rgba(0, 240, 255, 0.25);
-  --border-neon-pink: rgba(255, 0, 85, 0.25);
+  --border-neon-pink: rgba(217, 70, 239, 0.25);
   
   --shadow-neon: 0 0 15px rgba(0, 240, 255, 0.15);
-  --shadow-neon-pink: 0 0 15px rgba(255, 0, 85, 0.15);
+  --shadow-neon-pink: 0 0 15px rgba(217, 70, 239, 0.15);
   --glass-blur: blur(16px);
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -34,15 +36,24 @@
 }
 
 body {
-  background-color: var(--bg-deep);
+  background-color: #070415;
   color: var(--text-primary);
   font-family: var(--font-main);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.5;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.02) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.02) 0%, transparent 40%);
+  background-image:
+    /* Orange wave flow top-left/middle-left */
+    radial-gradient(ellipse 70% 50% at 0% 30%, hsla(25, 95%, 55%, 0.28) 0%, transparent 70%),
+    /* Pink wave flow center */
+    radial-gradient(ellipse 60% 40% at 45% 50%, hsla(300, 85%, 55%, 0.25) 0%, transparent 70%),
+    /* Purple wave flow top-center/right */
+    radial-gradient(ellipse 70% 60% at 90% 10%, hsla(265, 90%, 60%, 0.28) 0%, transparent 70%),
+    /* Cyan wave flow bottom-left/middle */
+    radial-gradient(ellipse 80% 60% at 10% 85%, hsla(190, 95%, 50%, 0.32) 0%, transparent 65%),
+    /* Deep indigo foundation */
+    radial-gradient(circle at 80% 80%, hsla(240, 75%, 25%, 0.25) 0%, transparent 60%),
+    linear-gradient(145deg, #090518 0%, #030206 100%);
   background-attachment: fixed;
 }
 
@@ -136,12 +147,12 @@ body {
 .logo-pro-badge {
   font-size: 10px;
   font-weight: 900;
-  background: linear-gradient(90deg, var(--neon-pink), #ff5500);
+  background: linear-gradient(90deg, var(--neon-orange), var(--neon-pink), var(--neon-purple), var(--neon-cyan));
   color: #fff;
   padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 0.5px;
-  box-shadow: 0 0 10px rgba(255,0,85,0.4);
+  box-shadow: 0 0 12px rgba(217, 70, 239, 0.4);
 }
 .current-preset-indicator {
   font-size: 12px;

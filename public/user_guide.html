@@ -10,13 +10,14 @@
   <style>
     :root {
       --bg-dark: #07070c;
-      --bg-card: rgba(16, 16, 26, 0.6);
+      --bg-card: rgba(16, 16, 26, 0.7);
       --border-neon: rgba(0, 240, 255, 0.25);
       --text-main: #e2e2e9;
       --text-muted: #8a8a9d;
       --neon-cyan: #00f0ff;
       --neon-purple: #8b5cf6;
-      --neon-pink: #ff007f;
+      --neon-pink: #d946ef;
+      --neon-orange: #f97316;
       --font-display: 'Outfit', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -28,37 +29,36 @@
     }
 
     body {
-      background-color: var(--bg-dark);
+      background-color: #070415;
       color: var(--text-main);
       font-family: var(--font-display);
       line-height: 1.6;
       padding: 40px 20px;
       overflow-x: hidden;
+      background-image:
+        /* Orange wave flow top-left/middle-left */
+        radial-gradient(ellipse 70% 50% at 0% 30%, hsla(25, 95%, 55%, 0.28) 0%, transparent 70%),
+        /* Pink wave flow center */
+        radial-gradient(ellipse 60% 40% at 45% 50%, hsla(300, 85%, 55%, 0.25) 0%, transparent 70%),
+        /* Purple wave flow top-center/right */
+        radial-gradient(ellipse 70% 60% at 90% 10%, hsla(265, 90%, 60%, 0.28) 0%, transparent 70%),
+        /* Cyan wave flow bottom-left/middle */
+        radial-gradient(ellipse 80% 60% at 10% 85%, hsla(190, 95%, 50%, 0.32) 0%, transparent 65%),
+        /* Deep indigo foundation */
+        radial-gradient(circle at 80% 80%, hsla(240, 75%, 25%, 0.25) 0%, transparent 60%),
+        linear-gradient(145deg, #090518 0%, #030206 100%);
+      background-attachment: fixed;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
 
-    /* Background glow decorations for web view */
+    /* Background glow decorations representing the wave colors */
     .glow-bg {
-      position: fixed;
-      width: 40vw;
-      height: 40vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, rgba(139, 92, 246, 0.04) 50%, rgba(0,0,0,0) 100%);
-      top: -10vw;
-      right: -10vw;
-      z-index: -1;
-      pointer-events: none;
+      display: none;
     }
 
     .glow-bg-left {
-      position: fixed;
-      width: 50vw;
-      height: 50vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 0, 127, 0.05) 0%, rgba(139, 92, 246, 0.03) 60%, rgba(0,0,0,0) 100%);
-      bottom: -15vw;
-      left: -15vw;
-      z-index: -1;
-      pointer-events: none;
+      display: none;
     }
 
     .container {
@@ -89,10 +89,10 @@
     h1 {
       font-size: 38px;
       font-weight: 800;
-      background: linear-gradient(135deg, #ffffff 30%, var(--neon-cyan) 70%, var(--neon-purple));
+      background: linear-gradient(135deg, #ffffff 20%, var(--neon-orange) 45%, var(--neon-pink) 70%, var(--neon-cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+      text-shadow: 0 0 20px rgba(217, 70, 239, 0.25);
       margin-bottom: 15px;
     }
 
@@ -153,7 +153,7 @@
 
     .manual-section {
       background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-dim);
       border-radius: 12px;
       padding: 30px;
       margin-bottom: 30px;
@@ -253,26 +253,49 @@
       margin-bottom: 0;
     }
 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    td {
+      color: var(--text-main);
+    }
+
     /* Print Floating Button styling */
     .print-fab {
       position: fixed;
       bottom: 30px;
       right: 30px;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      background: linear-gradient(135deg, var(--neon-orange), var(--neon-pink), var(--neon-purple), var(--neon-cyan));
       border: none;
       outline: none;
-      color: #07070c;
+      color: #fff;
       padding: 14px 28px;
       border-radius: 50px;
       font-family: var(--font-display);
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 4px 20px rgba(217, 70, 239, 0.4);
       transition: all 0.3s ease;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       z-index: 100;
@@ -280,7 +303,7 @@
 
     .print-fab:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(0, 240, 255, 0.6);
+      box-shadow: 0 6px 25px rgba(217, 70, 239, 0.6);
       filter: brightness(1.1);
     }
 
@@ -290,13 +313,27 @@
       fill: currentColor;
     }
 
-    /* Print media optimization overrides */
+    /* PREMIUM DARK THEME PRINT MEDIA QUERIES */
     @media print {
       body {
-        background-color: #ffffff !important;
-        color: #111111 !important;
+        background-color: #070415 !important;
+        color: #e2e2e9 !important;
         padding: 0 !important;
-        font-size: 12pt;
+        background-image:
+          /* Orange wave flow top-left/middle-left */
+          radial-gradient(ellipse 70% 50% at 0% 30%, hsla(25, 95%, 55%, 0.28) 0%, transparent 70%),
+          /* Pink wave flow center */
+          radial-gradient(ellipse 60% 40% at 45% 50%, hsla(300, 85%, 55%, 0.25) 0%, transparent 70%),
+          /* Purple wave flow top-center/right */
+          radial-gradient(ellipse 70% 60% at 90% 10%, hsla(265, 90%, 60%, 0.28) 0%, transparent 70%),
+          /* Cyan wave flow bottom-left/middle */
+          radial-gradient(ellipse 80% 60% at 10% 85%, hsla(190, 95%, 50%, 0.32) 0%, transparent 65%),
+          /* Deep indigo foundation */
+          radial-gradient(circle at 80% 80%, hsla(240, 75%, 25%, 0.25) 0%, transparent 60%),
+          linear-gradient(145deg, #090518 0%, #030206 100%) !important;
+        background-attachment: fixed !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       .glow-bg,
@@ -312,86 +349,73 @@
       }
 
       header {
-        border-bottom: 1px solid #111111 !important;
+        border-bottom: 2px dashed rgba(0, 240, 255, 0.25) !important;
         margin-bottom: 30px !important;
         padding-bottom: 15px !important;
       }
 
       h1 {
-        background: none !important;
-        -webkit-text-fill-color: #111111 !important;
-        color: #111111 !important;
-        font-size: 24pt !important;
-        text-shadow: none !important;
-      }
-
-      .subtitle {
-        color: #444444 !important;
-        font-size: 11pt !important;
+        background: linear-gradient(135deg, #ffffff 20%, #f97316 45%, #d946ef 70%, #00f0ff) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        color: #ffffff !important;
+        font-size: 26pt !important;
       }
 
       .manual-section {
-        background: none !important;
-        border: none !important;
+        background: rgba(16, 16, 26, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: none !important;
-        padding: 0 !important;
-        margin-bottom: 30px !important;
-        page-break-inside: avoid; /* Don't split sections across pages */
+        padding: 20px !important;
+        margin-bottom: 20px !important;
+        page-break-inside: avoid; /* Do not split sections across print pages */
       }
 
       .manual-section h2 {
-        color: #111111 !important;
-        font-size: 16pt !important;
-        border-left: 4px solid #111111 !important;
-        padding-left: 10px !important;
-        margin-top: 20px !important;
-        page-break-after: avoid; /* Prevent heading orphans */
-      }
-
-      .manual-section h3 {
-        color: #333333 !important;
-        font-size: 12pt !important;
-        margin-top: 15px !important;
+        color: #ffffff !important;
+        border-left: 3px solid #00f0ff !important;
         page-break-after: avoid;
       }
 
-      p, li {
-        color: #222222 !important;
-        font-size: 10pt !important;
-        line-height: 1.5 !important;
+      .manual-section h3 {
+        color: #00f0ff !important;
+        page-break-after: avoid;
+      }
+
+      p, li, td {
+        color: #e2e2e9 !important;
+      }
+
+      th {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
       }
 
       code {
-        background: #f4f4f4 !important;
-        color: #000000 !important;
-        border: 1px solid #dddddd !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #d946ef !important;
       }
 
       .code-block {
-        background: #fafafa !important;
-        color: #111111 !important;
-        border: 1px solid #cccccc !important;
-        page-break-inside: avoid;
+        background: #040408 !important;
+        color: #c7c7d5 !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
       }
 
       .highlight-tip {
-        background: #f0f8ff !important;
-        border: 1px solid #b0c4de !important;
-        border-left: 4px solid #4682b4 !important;
-        color: #222222 !important;
-        page-break-inside: avoid;
+        background: rgba(0, 240, 255, 0.05) !important;
+        border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        border-left: 4px solid #00f0ff !important;
       }
 
       .highlight-warning {
-        background: #fff0f5 !important;
-        border: 1px solid #ffb6c1 !important;
-        border-left: 4px solid #db7093 !important;
-        color: #222222 !important;
-        page-break-inside: avoid;
+        background: rgba(217, 70, 239, 0.04) !important;
+        border: 1px solid rgba(217, 70, 239, 0.15) !important;
+        border-left: 4px solid #d946ef !important;
       }
 
       @page {
-        margin: 20mm 15mm 20mm 15mm;
+        margin: 15mm 15mm 15mm 15mm;
       }
     }
   </style>
@@ -409,15 +433,16 @@
     <header>
       <div class="header-logo">
         <span style="letter-spacing: 3px;">Novelleyx</span>
-        <span style="background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple)); color: #fff; padding: 2px 6px; font-size: 9px; border-radius: 3px; font-weight: 900;">PRO</span>
+        <span style="background: linear-gradient(90deg, var(--neon-orange), var(--neon-pink), var(--neon-purple), var(--neon-cyan)); color: #fff; padding: 2px 6px; font-size: 9px; border-radius: 3px; font-weight: 900;">PRO</span>
       </div>
       <h1>System Operations & User Guide</h1>
-      <div class="subtitle">Complete detailed operation guidelines for each workspace module, setting controls, and integration systems of the Novelleyx Email Engine.</div>
+      <div class="subtitle">Detailed operations guide, configuration specifications, and AI automation instructions. PDF output is locked to the original dark theme.</div>
     </header>
 
     <div class="table-of-contents">
       <div class="toc-title">Table of Contents</div>
       <ul>
+        <li><a href="#requirements">0. System Requirements & Specs</a></li>
         <li><a href="#presets">1. Brand Profiles & Presets</a></li>
         <li><a href="#graphics">2. Promotional Banner Graphics</a></li>
         <li><a href="#hotspots">3. Hotspot Area Editor</a></li>
@@ -425,8 +450,51 @@
         <li><a href="#footer">5. Footer & Social Configurations</a></li>
         <li><a href="#sending">6. Email Transmission System</a></li>
         <li><a href="#ai">7. Novelleyx AI Assistant</a></li>
-        <li><a href="#export">8. PDF Export & Print Tips</a></li>
+        <li><a href="#export">8. PDF Export & Print Setup</a></li>
       </ul>
+    </div>
+
+    <!-- Section 0 -->
+    <div id="requirements" class="manual-section">
+      <h2>0. System Requirements & Specs</h2>
+      <p>The Novelleyx Email Engine is built entirely as a client-side React SPA, executing zero-backend operations to protect sensitive credentials (e.g. SMTP passwords, API keys) from server exposure.</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Requirement / Spec</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Host Environments</strong></td>
+            <td>Modern browsers supporting HTML5 Canvas & Web API</td>
+            <td>Chrome, Edge, Safari, Firefox.</td>
+          </tr>
+          <tr>
+            <td><strong>SMTP Relay</strong></td>
+            <td>Valid SMTP server credentials (host, port, user, pass)</td>
+            <td>Requires public SMTPJS relaying.</td>
+          </tr>
+          <tr>
+            <td><strong>Webhook API</strong></td>
+            <td>HTTP(S) endpoint accepting JSON POST payloads</td>
+            <td>Make.com, Zapier, custom REST endpoints.</td>
+          </tr>
+          <tr>
+            <td><strong>Local Storage</strong></td>
+            <td>Browser LocalStorage enabled</td>
+            <td>Used to persist credentials & custom presets.</td>
+          </tr>
+          <tr>
+            <td><strong>Image Restrictions</strong></td>
+            <td>Base64 files limited to 3MB</td>
+            <td>External CDN urls have no size limits.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Section 1 -->
@@ -439,8 +507,8 @@
         <li><strong>Select Active Profile:</strong> Quickly apply preset styles from saved companies. By default, the system provides a core <code>Novelleyx</code> profile. Newly created profiles populate here instantly.</li>
         <li><strong>Add Company Profile:</strong> Opens a modal dialog to define a new brand archetype. You can specify a company name, a main fallback website URL, a primary theme hex color, and a brand logo URL. The system will auto-generate preset templates for this company.</li>
         <li><strong>Brand Name:</strong> Controls the textual representation of your brand in the email header and footer metadata.</li>
-        <li><strong>Fallback Link URL:</strong> The safety URL configuration. If a customer clicks on your promotional banner graphic outside of your specifically mapped hotspot click zones, they will be automatically redirected to this URL.</li>
-        <li><strong>Inboxes Preheader:</strong> The invisible preview text that appears next to the subject line in modern email clients (like Gmail or Outlook). Crafting a high-conversion preheader significantly boosts email Open Rates.</li>
+        <li><strong>Fallback Link URL:</strong> The safety URL configuration. If a customer clicks on your promotional banner graphic outside of your specifically mapped hotspot click zones, they will be redirected to this URL.</li>
+        <li><strong>Inboxes Preheader:</strong> The invisible preview text that appears next to the subject line in modern email clients.</li>
       </ul>
 
       <div class="highlight-tip">
@@ -486,10 +554,6 @@
           </ul>
         </li>
       </ul>
-      
-      <div class="highlight-tip">
-        <p><strong>User Tip:</strong> You can edit a hotspot's redirect link at any time by clicking "Edit Link" in the hotspot list below the canvas or by double-clicking the hotspot rectangle overlay.</p>
-      </div>
     </div>
 
     <!-- Section 4 -->
@@ -541,7 +605,7 @@ Payload: { Host, Port, Username, Password, Secure, To, From, Subject, Body, Atta
       </div>
 
       <h3>Method B: API Webhook Dispatch</h3>
-      <p>Routes the compiled HTML code, sender metadata, and base64 attachment buffer objects as a JSON payload to a custom webhook URL (e.g., Make.com, Zapier, or a custom REST API endpoint).</p>
+      <p>Routes the compiled HTML code, sender metadata, and base64 attachment buffer objects as a JSON payload to a custom webhook URL.</p>
       
       <div class="code-block">
 POST [Your Webhook URL]
@@ -564,27 +628,42 @@ Payload:
       <h2>7. Novelleyx AI Assistant</h2>
       <p>The Novelleyx AI Assistant (found in settings section 6) is an automation helper built directly into the sidebar panel. It uses a client-side NLP intent-parsing model to instantly configure theme styles, copywriting, navigation link structures, and preset configurations based on simple language instructions.</p>
 
-      <h3>How to Operate the AI Assistant</h3>
+      <h3>How Under-the-Hood Automation Works</h3>
+      <p>When you click <strong>Generate Brand Experience</strong>, the following operations run sequentially:</p>
       <ol>
-        <li>Select your <strong>Automation Focus Scope</strong> (Full Auto brand generation, Visual style only, or Promotional CTA copywriter only).</li>
-        <li>Write a plain English command in the prompt input field (e.g. <em>"Create an organic wellness brand styled around botanical skincare"</em> or <em>"A sales campaign for cyberpunk neon streetwear"</em>).</li>
-        <li>Click <strong>Generate Brand Experience</strong>.</li>
-        <li>Observe the <strong>AI Reasoning Core Terminal</strong> console as the engine parses archetypes, maps variables, outputs step-by-step thinking logs, and applies parameters directly to the editor canvas in real-time.</li>
+        <li><strong>Intent Keyword Mapping:</strong> The assistant parses prompt keywords for archetypes (e.g. Wellness, Enterprise, Playful, Fashion).</li>
+        <li><strong>Variable Construction:</strong> Resolves appropriate color hex codes (e.g., green for wellness, navy for corporate), compiles marketing hooks for headline copy, and drafts domain navigation layouts matching the brand name.</li>
+        <li><strong>React Batch-State updates:</strong> Consolidates all brand and CTA settings into a single atomic update object to prevent React render-tick racing.</li>
+        <li><strong>Auto-Activation:</strong> Automatically forces <code>headerActive: true</code> and <code>ctaActive: true</code> to ensure the generated sections instantly render visible on the visual preview canvas.</li>
       </ol>
+
+      <h3>Core Stability & Safety Updates</h3>
+      <p>Recent enhancements have resolved issues where the automation engine could freeze, fail to execute, or become "not responding" under specific conditions:</p>
+      <ul>
+        <li><strong>Exception Guarding (Try-Catch-Finally):</strong> The entire execution lifecycle is now wrapped in a robust exception-handling block. In the event of a state validation failure or parsing anomaly, the error is gracefully caught, written to the reasoning console, and the loading state is finalized. This guarantees the assistant remains responsive and never locks up.</li>
+        <li><strong>Atomic State Commit:</strong> State updates are consolidated into a single atomic transaction before calling <code>onChange</code>. This prevents React state batching race conditions, ensuring that both brand presets and CTA configurations apply in one single layout render.</li>
+      </ul>
+
+      <h3>Operating Steps:</h3>
+      <ul>
+        <li>Select the **Automation Focus Scope** (Brand themes, CTA copy, or both).</li>
+        <li>Input your design command (e.g., <em>"A clean tech company named Zenith AI using dark violet colors"</em>).</li>
+        <li>Click <strong>Generate Brand Experience</strong> and watch the reasoning console output the live compiled parameters.</li>
+      </ul>
     </div>
 
     <!-- Section 8 -->
     <div id="export" class="manual-section">
-      <h2>8. PDF Export & Print Tips</h2>
-      <p>This user manual is formatted dynamically for both digital reading and physical print layouts. Follow these steps to generate a professional PDF copy for offline reference.</p>
+      <h2>8. PDF Export & Print Setup</h2>
+      <p>Unlike standard print styles that convert documents into plain black-and-white, this guide is configured to preserve the complete premium dark cyber-theme, background gradients, and neon warning highlights inside the PDF file itself.</p>
 
-      <h3>How to Save this Manual as a PDF:</h3>
+      <h3>Printing Settings to Apply:</h3>
       <ol>
         <li>Click the floating <strong>Save as PDF / Print</strong> button at the bottom-right corner of this page (or press <code>Ctrl + P</code> on Windows / <code>Cmd + P</code> on macOS).</li>
-        <li>In the printer dialog prompt that appears, change the <strong>Destination</strong> dropdown select menu to <strong>Save as PDF</strong>.</li>
-        <li>Ensure the <strong>Margins</strong> parameter is set to <em>Default</em> or <em>Custom</em> with clean spacing.</li>
-        <li>Check the checkbox for <strong>Background Graphics</strong> to preserve visual indicators, icons, and warning box highlight colors.</li>
-        <li>Click <strong>Save</strong> and select your destination directory.</li>
+        <li>Set the printer <strong>Destination</strong> to <strong>Save as PDF</strong>.</li>
+        <li>In the printer settings panel, you **MUST check the checkbox for "Background Graphics"**. If you do not check this, the browser will strip out gradients and dark background variables, resulting in plain default layouts.</li>
+        <li>Ensure layout borders and margins are set to *Default*.</li>
+        <li>Click **Save** to export your dark theme user guide PDF.</li>
       </ol>
     </div>
   </div>
