@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Monitor, Smartphone, Code, Copy, Download, Check, AlertCircle } from 'lucide-react';
+import { Monitor, Smartphone, Copy, Download, Check, Send } from 'lucide-react';
 
 interface PreviewTabsProps {
   htmlCode: string;
+  onSendEmail: () => void;
 }
 
-type TabType = 'desktop' | 'mobile' | 'code';
+type TabType = 'desktop' | 'mobile';
 
-export const PreviewTabs: React.FC<PreviewTabsProps> = ({ htmlCode }) => {
+export const PreviewTabs: React.FC<PreviewTabsProps> = ({ htmlCode, onSendEmail }) => {
   const [activeTab, setActiveTab] = useState<TabType>('desktop');
   const [copied, setCopied] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Update iframe contents whenever htmlCode changes
   useEffect(() => {
-    if (activeTab !== 'code' && iframeRef.current) {
+    if (iframeRef.current) {
       const iframe = iframeRef.current;
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
       if (doc) {
@@ -77,14 +78,6 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({ htmlCode }) => {
             <Smartphone size={14} />
             <span>Mobile</span>
           </button>
-          <button
-            type="button"
-            className={`tab-btn ${activeTab === 'code' ? 'active' : ''}`}
-            onClick={() => setActiveTab('code')}
-          >
-            <Code size={14} />
-            <span>HTML Source</span>
-          </button>
         </div>
 
         <div className="preview-actions">
@@ -118,6 +111,17 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({ htmlCode }) => {
             <Download size={13} />
             <span>DOWNLOAD</span>
           </button>
+
+          <button
+            type="button"
+            className="action-pill btn-send"
+            onClick={onSendEmail}
+            title="Send Email Campaign"
+            disabled={!htmlCode}
+          >
+            <Send size={13} />
+            <span>SEND EMAIL</span>
+          </button>
         </div>
       </div>
 
@@ -147,28 +151,9 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({ htmlCode }) => {
             </div>
           </div>
         )}
-
-        {activeTab === 'code' && (
-          <div className="code-view-container animate-fade-in">
-            {htmlCode.includes('base64') && (
-              <div className="code-warning">
-                <AlertCircle size={14} />
-                <span>
-                  <strong>Tip:</strong> Inline base64 images inside emails can be blocked by some mail clients (like Outlook or Gmail). For campaign sending, toggle to <strong>CDN Hosted Image URL</strong>.
-                </span>
-              </div>
-            )}
-            <textarea
-              readOnly
-              value={htmlCode}
-              placeholder="Production HTML will display here..."
-              className="code-textarea scrollbar-neon"
-              onClick={(e) => (e.target as HTMLTextAreaElement).select()}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
 };
 export default PreviewTabs;
+

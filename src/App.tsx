@@ -5,6 +5,7 @@ import { HotspotCanvas } from './components/HotspotCanvas';
 import { HotspotList } from './components/HotspotList';
 import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
+import { SendEmailModal } from './components/SendEmailModal';
 import { generateEmailHtml } from './utils/emailGenerator';
 import { Sparkles, Layers } from 'lucide-react';
 
@@ -44,46 +45,6 @@ const SYSTEM_DEFAULT_PRESETS: BrandPreset[] = [
       { platform: 'instagram', url: 'https://instagram.com/novelleyx', active: true },
       { platform: 'linkedin', url: 'https://linkedin.com/company/novelleyx', active: true },
       { platform: 'youtube', url: 'https://youtube.com/novelleyx', active: false }
-    ]
-  },
-  {
-    id: 'zennova',
-    name: 'Zennova Esports',
-    fallbackUrl: 'https://zennova.gg',
-    logoUrl: '',
-    primaryColor: '#ff0055',
-    navLinks: [
-      { text: 'Roster', url: 'https://zennova.gg/roster' },
-      { text: 'Tournaments', url: 'https://zennova.gg/tournaments' },
-      { text: 'Merch Shop', url: 'https://zennova.gg/shop' }
-    ],
-    footerText: '© 2026 Zennova Esports LLC. All Esports trademarks and logos belong to their respective owners.',
-    socialLinks: [
-      { platform: 'facebook', url: '', active: false },
-      { platform: 'x', url: 'https://x.com/zennova_gg', active: true },
-      { platform: 'instagram', url: 'https://instagram.com/zennova_gg', active: true },
-      { platform: 'linkedin', url: '', active: false },
-      { platform: 'youtube', url: 'https://youtube.com/zennova_gg', active: true }
-    ]
-  },
-  {
-    id: 'zenbio',
-    name: 'Zen Biomedical',
-    fallbackUrl: 'https://zenbiomedical.com',
-    logoUrl: '',
-    primaryColor: '#10b981',
-    navLinks: [
-      { text: 'Research Lab', url: 'https://zenbiomedical.com/research' },
-      { text: 'Clinical Trials', url: 'https://zenbiomedical.com/trials' },
-      { text: 'Publications', url: 'https://zenbiomedical.com/publications' }
-    ],
-    footerText: '© 2026 Zen Biomedical Laboratories. Approved for investigational research purposes only.',
-    socialLinks: [
-      { platform: 'facebook', url: 'https://facebook.com/zenbio', active: true },
-      { platform: 'x', url: 'https://x.com/zenbiomedical', active: false },
-      { platform: 'instagram', url: '', active: false },
-      { platform: 'linkedin', url: 'https://linkedin.com/company/zenbiomedical', active: true },
-      { platform: 'youtube', url: '', active: false }
     ]
   }
 ];
@@ -125,7 +86,8 @@ export const App: React.FC = () => {
   const [base64Image, setBase64Image] = useState<string>('');
   const [imgDimensions, setImgDimensions] = useState({ width: 600, height: 400 });
 
-  // Modal dialog state
+  // Modal states
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     isEditing: boolean;
@@ -218,19 +180,19 @@ export const App: React.FC = () => {
     }));
   };
 
-  const handleSavePreset = (presetName: string) => {
+  const handleSavePreset = (newBrandDetails: Omit<BrandPreset, 'id'>) => {
     const newPreset: BrandPreset = {
       id: 'preset_' + Date.now(),
-      name: presetName,
-      logoUrl: config.headerLogoUrl,
-      fallbackUrl: config.fallbackUrl,
-      primaryColor: config.headerTextColor,
-      navLinks: [...config.navLinks],
-      footerText: config.footerText,
-      socialLinks: [...config.socialLinks]
+      ...newBrandDetails
     };
 
     const updated = [newPreset, ...presets];
+    setPresets(updated);
+    localStorage.setItem('novelleyx_email_presets', JSON.stringify(updated));
+  };
+
+  const handleDeletePreset = (presetId: string) => {
+    const updated = presets.filter(p => p.id !== presetId);
     setPresets(updated);
     localStorage.setItem('novelleyx_email_presets', JSON.stringify(updated));
   };
@@ -331,6 +293,7 @@ export const App: React.FC = () => {
             presets={presets}
             onPresetSelect={handlePresetSelect}
             onSavePreset={handleSavePreset}
+            onDeletePreset={handleDeletePreset}
             onImageUpload={handleImageUpload}
             base64Image={base64Image}
           />
@@ -361,9 +324,12 @@ export const App: React.FC = () => {
         {/* RIGHT COLUMN: Realtime HTML Render Preview */}
         <section className="preview-col">
           <div className="preview-column-header">
-            <h3>3. Realtime Rendering & Code Engine</h3>
+            <h3>3. Realtime Rendering Preview</h3>
           </div>
-          <PreviewTabs htmlCode={compiledHtml} />
+          <PreviewTabs 
+            htmlCode={compiledHtml} 
+            onSendEmail={() => setIsSendModalOpen(true)}
+          />
         </section>
       </div>
 
@@ -375,6 +341,14 @@ export const App: React.FC = () => {
         onSave={handleSaveHotspot}
         initialUrl={modalState.initialUrl}
         initialLabel={modalState.initialLabel}
+      />
+
+      {/* Direct Sending & Attachments Modal */}
+      <SendEmailModal
+        isOpen={isSendModalOpen}
+        onClose={() => setIsSendModalOpen(false)}
+        htmlCode={compiledHtml}
+        companyName={config.companyName}
       />
     </div>
   );

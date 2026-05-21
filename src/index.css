@@ -1128,3 +1128,242 @@ input:checked + .slider:before {
   gap: 10px;
   margin-top: 20px;
 }
+
+/* --- Direct Send Email Modal & Attachments --- */
+.action-pill.btn-send {
+  background: linear-gradient(90deg, #d946ef, #8b5cf6);
+  color: #fff;
+  border: none;
+}
+.action-pill.btn-send:hover {
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+}
+
+.attachment-dropzone {
+  border: 1px dashed var(--border-dim);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  transition: var(--transition-smooth);
+}
+.attachment-dropzone:hover {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 240, 255, 0.02);
+}
+.attachment-dropzone span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.attachment-file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.attachment-file-name {
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 250px;
+}
+.attachment-file-size {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-left: 5px;
+}
+.btn-remove-attachment {
+  background: none;
+  border: none;
+  color: var(--neon-pink);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* Stepper Stepper styling */
+.stepper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 15px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  border: 1px solid var(--border-dim);
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.step-item.active {
+  opacity: 1;
+}
+.step-item.completed {
+  opacity: 0.85;
+}
+.step-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: #07070a;
+}
+.step-item.active .step-circle {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+}
+.step-item.completed .step-circle {
+  border-color: var(--neon-cyan);
+  background: var(--neon-cyan);
+  color: var(--text-dark);
+}
+.step-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.step-item.active .step-text {
+  color: #fff;
+}
+.step-item.completed .step-text {
+  color: #fff;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Presets List Custom deletion */
+.presets-list-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  margin-top: 8px;
+  padding: 4px;
+}
+.preset-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.preset-list-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.preset-list-row.active {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+}
+.preset-row-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.btn-delete-preset {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+}
+.btn-delete-preset:hover {
+  color: var(--neon-pink);
+  background: rgba(255, 0, 85, 0.1);
+}
+
+.spinner-neon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 240, 255, 0.2);
+  border-top-color: var(--neon-cyan);
+  border-radius: 50%;
+  animation: spin-anim 0.8s linear infinite;
+}
+@keyframes spin-anim {
+  to { transform: rotate(360deg); }
+}
+
+/* Send method cards */
+.send-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.send-method-card {
+  border: 1px solid var(--border-dim);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+.send-method-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.send-method-card.active {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 240, 255, 0.04);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+}
+.method-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.method-card-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.upload-dropzone.dragging,
+.attachment-dropzone.dragging {
+  border-color: var(--neon-cyan) !important;
+  background: rgba(0, 240, 255, 0.08) !important;
+  box-shadow: var(--shadow-neon) !important;
+  color: var(--neon-cyan) !important;
+}
+

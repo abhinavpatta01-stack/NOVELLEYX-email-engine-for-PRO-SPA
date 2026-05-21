@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { EmailConfig, NavLink, SocialLink, BrandPreset } from '../types';
 import { 
   Building, Image, Type, Compass, 
-  Share2, ChevronDown, ChevronUp, Upload 
+  Share2, ChevronDown, ChevronUp, Upload, Trash, Plus, X 
 } from 'lucide-react';
 
 interface EmailSettingsProps {
@@ -10,7 +10,8 @@ interface EmailSettingsProps {
   onChange: (updates: Partial<EmailConfig>) => void;
   presets: BrandPreset[];
   onPresetSelect: (presetId: string) => void;
-  onSavePreset: (presetName: string) => void;
+  onSavePreset: (preset: Omit<BrandPreset, 'id'>) => void;
+  onDeletePreset: (presetId: string) => void;
   onImageUpload: (file: File) => void;
   base64Image: string;
 }
@@ -23,12 +24,19 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
   presets,
   onPresetSelect,
   onSavePreset,
+  onDeletePreset,
   onImageUpload,
   base64Image
 }) => {
   const [activeAccordion, setActiveAccordion] = useState<AccordionKey>('brand');
-  const [newPresetName, setNewPresetName] = useState('');
-  const [showSavePresetDialog, setShowSavePresetDialog] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Custom Preset Modal State
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [addCompanyName, setAddCompanyName] = useState('');
+  const [addFallbackUrl, setAddFallbackUrl] = useState('https://');
+  const [addPrimaryColor, setAddPrimaryColor] = useState('#00f0ff');
+  const [addLogoUrl, setAddLogoUrl] = useState('');
 
   const toggleAccordion = (key: AccordionKey) => {
     setActiveAccordion(activeAccordion === key ? 'brand' : key);
@@ -36,6 +44,25 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file) {
+      onImageUpload(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
     if (file) {
       onImageUpload(file);
     }
@@ -49,7 +76,7 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
   };
 
   const addNavLink = () => {
-    if (config.navLinks.length >= 4) return; // Limit nav items
+    if (config.navLinks.length >= 4) return;
     onChange({
       navLinks: [...config.navLinks, { text: 'New Page', url: 'https://' }]
     });
@@ -67,12 +94,36 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
     onChange({ socialLinks: newSocials });
   };
 
-  const handleSavePresetSubmit = (e: React.FormEvent) => {
+  const handleCreateCompanySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPresetName.trim()) return;
-    onSavePreset(newPresetName.trim());
-    setNewPresetName('');
-    setShowSavePresetDialog(false);
+    if (!addCompanyName.trim()) return;
+
+    onSavePreset({
+      name: addCompanyName.trim(),
+      fallbackUrl: addFallbackUrl.trim(),
+      logoUrl: addLogoUrl.trim(),
+      primaryColor: addPrimaryColor,
+      navLinks: [
+        { text: 'Home', url: addFallbackUrl.trim() },
+        { text: 'Products', url: addFallbackUrl.trim() + '/products' },
+        { text: 'Contact Us', url: addFallbackUrl.trim() + '/contact' }
+      ],
+      footerText: `© ${new Date().getFullYear()} ${addCompanyName.trim()} Technology Inc. All Rights Reserved.`,
+      socialLinks: [
+        { platform: 'facebook', url: 'https://facebook.com', active: false },
+        { platform: 'x', url: 'https://x.com', active: true },
+        { platform: 'instagram', url: 'https://instagram.com', active: true },
+        { platform: 'linkedin', url: 'https://linkedin.com', active: false },
+        { platform: 'youtube', url: 'https://youtube.com', active: false }
+      ]
+    });
+
+    // Reset and Close
+    setAddCompanyName('');
+    setAddFallbackUrl('https://');
+    setAddPrimaryColor('#00f0ff');
+    setAddLogoUrl('');
+    setShowAddCompanyModal(false);
   };
 
   return (
@@ -94,51 +145,46 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
 
         <div className="accordion-body">
           <div className="form-group">
-            <label>Load Brand Profile Preset</label>
-            <div className="flex-row gap-10">
-              <select 
-                className="select-custom" 
-                value="" 
-                onChange={(e) => {
-                  if (e.target.value) onPresetSelect(e.target.value);
-                }}
+            <div className="flex-row justify-between align-center mb-5">
+              <label>Select active company profile</label>
+              <button 
+                type="button" 
+                className="btn-tiny flex-row align-center gap-5"
+                onClick={() => setShowAddCompanyModal(true)}
               >
-                <option value="" disabled>-- Select Preset Profile --</option>
-                {presets.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+                <Plus size={10} />
+                <span>Add Company</span>
+              </button>
             </div>
             
-            <div className="preset-management-buttons mt-10">
-              {!showSavePresetDialog ? (
-                <button 
-                  type="button" 
-                  className="btn-tiny"
-                  onClick={() => setShowSavePresetDialog(true)}
-                >
-                  + Save Current Config as Preset
-                </button>
-              ) : (
-                <form onSubmit={handleSavePresetSubmit} className="flex-row gap-10 mt-10">
-                  <input
-                    type="text"
-                    value={newPresetName}
-                    onChange={(e) => setNewPresetName(e.target.value)}
-                    placeholder="Enter Profile Name..."
-                    className="input-tiny"
-                    required
-                  />
-                  <button type="submit" className="btn-tiny btn-submit">Save</button>
-                  <button 
-                    type="button" 
-                    className="btn-tiny btn-cancel"
-                    onClick={() => setShowSavePresetDialog(false)}
+            <div className="presets-list-container scrollbar-neon">
+              {presets.map(p => {
+                const isActive = config.companyName.toLowerCase() === p.name.toLowerCase();
+                return (
+                  <div 
+                    key={p.id} 
+                    className={`preset-list-row ${isActive ? 'active' : ''}`}
                   >
-                    Cancel
-                  </button>
-                </form>
-              )}
+                    <span 
+                      className="preset-row-name flex-1"
+                      onClick={() => onPresetSelect(p.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {p.name}
+                    </span>
+                    {p.id !== 'novelleyx' && (
+                      <button 
+                        type="button" 
+                        className="btn-delete-preset" 
+                        onClick={() => onDeletePreset(p.id)}
+                        title="Delete Company Profile"
+                      >
+                        <Trash size={12} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -218,11 +264,14 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
             <div className="form-group">
               <label>Select & Load Promotional Image</label>
               <div 
-                className={`upload-dropzone ${base64Image ? 'has-file' : ''}`}
+                className={`upload-dropzone ${base64Image ? 'has-file' : ''} ${isDragging ? 'dragging' : ''}`}
                 onClick={() => document.getElementById('sidebar-image-file')?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
                 <Upload size={24} className="icon-neon-cyan" />
-                <span>{base64Image ? 'Replace Banner Image' : 'Click to Upload Image'}</span>
+                <span>{isDragging ? 'Drop Image Here' : base64Image ? 'Replace Banner Image' : 'Click to Upload Image'}</span>
                 <span className="field-hint">Supports PNG, JPG, WEBP (Max 3MB)</span>
                 <input
                   id="sidebar-image-file"
@@ -313,6 +362,13 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
                   <div className="color-picker-input">
                     <input
                       id="header-text-color"
+                      type="color"
+                      value={config.headerTextColor}
+                      onChange={(e) => onChange({ headerTextColor: e.target.checked ? '#00f0ff' : config.headerTextColor })} // Safely bound
+                      className="hidden-color-input"
+                      style={{ display: 'none' }}
+                    />
+                    <input
                       type="color"
                       value={config.headerTextColor}
                       onChange={(e) => onChange({ headerTextColor: e.target.value })}
@@ -418,7 +474,7 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
                   id="cta-body"
                   value={config.ctaBody}
                   onChange={(e) => onChange({ ctaBody: e.target.value })}
-                  placeholder="Enter details about your promotion here. Keep paragraphs short and impactful."
+                  placeholder="Enter details about your promotion here."
                   rows={3}
                 />
               </div>
@@ -523,7 +579,7 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
                   id="footer-text-copyright"
                   value={config.footerText}
                   onChange={(e) => onChange({ footerText: e.target.value })}
-                  placeholder="© 2026 Novelleyx. 123 Neon Boulevard, Silicon Valley, CA 94016."
+                  placeholder="© 2026 Novelleyx."
                   rows={2}
                 />
               </div>
@@ -563,6 +619,91 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
           )}
         </div>
       </div>
+
+      {/* Sleek inline overlay Modal to create a new Company Preset */}
+      {showAddCompanyModal && (
+        <div className="modal-overlay animate-fade-in" style={{ zIndex: 1000 }}>
+          <div className="modal-content glassmorphism">
+            <div className="modal-header">
+              <div className="modal-title">
+                <Building className="icon-neon-cyan" size={16} />
+                <span>Create Company Profile</span>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowAddCompanyModal(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateCompanySubmit} className="modal-body flex-col gap-10">
+              <div className="form-group">
+                <label>Company / Brand Name</label>
+                <input
+                  type="text"
+                  value={addCompanyName}
+                  onChange={(e) => setAddCompanyName(e.target.value)}
+                  placeholder="e.g. Acme Corp"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Primary Redirect Link (Fallback URL)</label>
+                <input
+                  type="url"
+                  value={addFallbackUrl}
+                  onChange={(e) => setAddFallbackUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Primary Theme Color (Hex)</label>
+                <div className="color-picker-input">
+                  <input
+                    type="color"
+                    value={addPrimaryColor}
+                    onChange={(e) => setAddPrimaryColor(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    value={addPrimaryColor}
+                    onChange={(e) => setAddPrimaryColor(e.target.value)}
+                    className="color-hex"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Header Logo Image URL (Optional)</label>
+                <input
+                  type="url"
+                  value={addLogoUrl}
+                  onChange={(e) => setAddLogoUrl(e.target.value)}
+                  placeholder="https://example.com/logo.png"
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={() => setShowAddCompanyModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-submit">
+                  Save Preset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
