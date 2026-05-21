@@ -6,7 +6,7 @@ import { HotspotList } from './components/HotspotList';
 import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
 import { SendEmailModal } from './components/SendEmailModal';
-import { generateEmailHtml } from './utils/emailGenerator';
+import { generateEmailHtml, generateImageMapOnlyHtml } from './utils/emailGenerator';
 import { Sparkles, Layers } from 'lucide-react';
 
 // Default mock image for instant WOW factor when loading the editor
@@ -270,6 +270,16 @@ export const App: React.FC = () => {
     );
   }, [config, hotspots, base64Image, imgDimensions]);
 
+  const compiledImageMapOnlyHtml = useMemo(() => {
+    return generateImageMapOnlyHtml(
+      config,
+      hotspots,
+      base64Image,
+      imgDimensions.width,
+      imgDimensions.height
+    );
+  }, [config, hotspots, base64Image, imgDimensions]);
+
   return (
     <div className="container-root animate-fade-in">
       <header className="main-header glassmorphism">
@@ -328,6 +338,7 @@ export const App: React.FC = () => {
           </div>
           <PreviewTabs 
             htmlCode={compiledHtml} 
+            imageMapOnlyHtml={compiledImageMapOnlyHtml}
             onSendEmail={() => setIsSendModalOpen(true)}
           />
         </section>

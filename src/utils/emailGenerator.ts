@@ -238,3 +238,37 @@ export function generateEmailHtml(
 </body>
 </html>`;
 }
+
+export function generateImageMapOnlyHtml(
+  config: EmailConfig,
+  hotspots: Hotspot[],
+  base64Image: string,
+  originalWidth: number,
+  originalHeight: number
+): string {
+  const companyName = config.companyName || "Our Brand";
+  const emailWidth = 600;
+  const emailHeight = Math.round(emailWidth * (originalHeight / originalWidth)) || 400;
+
+  const imgSrc = config.imageType === 'base64'
+    ? base64Image || 'https://via.placeholder.com/600x400/101018/00f0ff?text=Upload+Image+To+Generate'
+    : config.externalImageUrl || 'https://via.placeholder.com/600x400/101018/00f0ff?text=No+External+Image+Url';
+
+  const mapName = `emailMap_${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+  const useMapAttr = hotspots.length > 0 ? `usemap="#${mapName}"` : '';
+
+  let mapHtml = '';
+  if (hotspots.length > 0) {
+    const areasHtml = hotspots.map((h, index) => {
+      const x1 = Math.round((h.left / 100) * emailWidth);
+      const y1 = Math.round((h.top / 100) * emailHeight);
+      const x2 = Math.round(((h.left + h.width) / 100) * emailWidth);
+      const y2 = Math.round(((h.top + h.height) / 100) * emailHeight);
+      return `<area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${h.url}" target="_blank" alt="${h.label || `Link ${index + 1}`}">`;
+    }).join('\n  ');
+
+    mapHtml = `\n<map name="${mapName}">\n  ${areasHtml}\n</map>`;
+  }
+
+  return `<img src="${imgSrc}" width="${emailWidth}" height="${emailHeight}" ${useMapAttr} alt="Promotional Offer" style="display: block; width: 100%; max-width: ${emailWidth}px; height: auto; border: 0; outline: none;">${mapHtml}`;
+}
