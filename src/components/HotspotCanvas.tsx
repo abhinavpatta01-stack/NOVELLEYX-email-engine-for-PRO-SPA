@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Hotspot } from '../types';
-import { Pencil, Trash2, Move, HelpCircle } from 'lucide-react';
+import { Pencil, Trash2, Move, HelpCircle, Plus } from 'lucide-react';
 
 interface HotspotCanvasProps {
   base64Image: string;
@@ -105,7 +105,11 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
     }
 
     // Set pointer capture to tracking mouse movements globally
-    containerRef.current?.setPointerCapture(e.pointerId);
+    try {
+      containerRef.current?.setPointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn("setPointerCapture failed:", err);
+    }
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -158,7 +162,11 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    containerRef.current?.releasePointerCapture(e.pointerId);
+    try {
+      containerRef.current?.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn("releasePointerCapture failed:", err);
+    }
 
     if (mode === 'drawing' && drawBox) {
       // Filter out micro boxes
@@ -182,12 +190,49 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
 
   return (
     <div className="canvas-wrapper">
-      <div className="canvas-header-bar">
-        <h3>2. Draw & Configure Interactive Regions</h3>
-        <div className="canvas-hint">
-          <HelpCircle size={14} />
-          <span>Click & drag on the image below to map a link, or drag nodes to adjust.</span>
+      <div className="canvas-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <div>
+          <h3>2. Draw & Configure Interactive Regions</h3>
+          <div className="canvas-hint">
+            <HelpCircle size={14} />
+            <span>Click & drag on the image below to map a link, or drag nodes to adjust.</span>
+          </div>
         </div>
+        <button
+          type="button"
+          className="btn-primary"
+          style={{
+            padding: '6px 12px',
+            fontSize: '11px',
+            background: 'linear-gradient(90deg, #d946ef, #8b5cf6)',
+            border: 'none',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: '4px',
+            cursor: base64Image ? 'pointer' : 'not-allowed',
+            opacity: base64Image ? 1 : 0.5,
+            boxShadow: '0 0 10px rgba(217, 70, 239, 0.25)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}
+          onClick={() => {
+            onAddHotspot({
+              url: 'https://',
+              label: `Link Zone ${hotspots.length + 1}`,
+              left: 30,
+              top: 35,
+              width: 40,
+              height: 30
+            });
+          }}
+          disabled={!base64Image}
+        >
+          <Plus size={12} />
+          <span>+ Add Region</span>
+        </button>
       </div>
 
       <div 
@@ -196,6 +241,7 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         {base64Image ? (
           <img 

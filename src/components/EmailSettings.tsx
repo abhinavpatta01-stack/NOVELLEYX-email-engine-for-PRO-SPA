@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EmailConfig, NavLink, SocialLink, BrandPreset } from '../types';
+import { EmailConfig, NavLink, SocialLink, BrandPreset, Hotspot } from '../types';
 import { 
   Building, Image, Type, Compass, 
   Share2, ChevronDown, ChevronUp, Upload, Trash, Plus, X, Sparkles, RefreshCw 
@@ -14,6 +14,7 @@ interface EmailSettingsProps {
   onDeletePreset: (presetId: string) => void;
   onImageUpload: (file: File) => void;
   base64Image: string;
+  onSetHotspots: (hotspots: Hotspot[]) => void;
 }
 
 type AccordionKey = 'brand' | 'image' | 'header' | 'cta' | 'footer' | 'ai';
@@ -26,7 +27,8 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
   onSavePreset,
   onDeletePreset,
   onImageUpload,
-  base64Image
+  base64Image,
+  onSetHotspots
 }) => {
   const [activeAccordion, setActiveAccordion] = useState<AccordionKey>('brand');
   const [isDragging, setIsDragging] = useState(false);
@@ -54,10 +56,35 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
     try {
       const promptLower = aiPrompt.toLowerCase();
       
+      // Clean prompt: extract brand name by filtering out command verbs/fillers
+      let brandName = '';
+      const quoteMatch = aiPrompt.match(/['"`]([^'"`]+)['"`]/);
+      if (quoteMatch) {
+        brandName = quoteMatch[1];
+      } else {
+        const cleanPromptText = aiPrompt.replace(/[^a-zA-Z0-9\s]/g, '');
+        const verbs = [
+          'generate', 'create', 'make', 'build', 'design', 'add', 'setup', 'set', 'up', 'run',
+          'me', 'us', 'our', 'a', 'an', 'the', 'brand', 'called', 'named', 'with', 'themed',
+          'theme', 'style', 'of', 'for', 'incorporate', 'company', 'business', 'incorporating',
+          'logo', 'svg', 'image', 'banner', 'website', 'page', 'app', 'mode', 'dark', 'light',
+          'color', 'palette', 'using', 'featuring'
+        ];
+        let words = cleanPromptText.toLowerCase()
+          .split(/\s+/)
+          .filter(w => w && !verbs.includes(w));
+        
+        if (words.length > 0) {
+          brandName = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).slice(0, 3).join(' ');
+        } else {
+          brandName = 'Novelleyx Neon';
+        }
+      }
+
       let theme = 'cyberpunk';
-      let brandName = 'Novelleyx Neon';
       let primaryColor = '#00f0ff';
       let logoBg = '#101018';
+      let bannerUrl = 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80';
       let navLinks = [
         { text: 'Features', url: 'https://example.com/features' },
         { text: 'Interactive Map', url: 'https://example.com/map' },
@@ -67,74 +94,117 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
       let ctaBody = 'Deploy interactive clickable maps directly in your customers\' inboxes. High performance, zero-friction path to purchase.';
       let ctaBtn = 'Learn More';
 
-      if (promptLower.includes('organic') || promptLower.includes('nature') || promptLower.includes('eco') || promptLower.includes('green') || promptLower.includes('wellness') || promptLower.includes('health') || promptLower.includes('botanical')) {
+      if (promptLower.includes('organic') || promptLower.includes('nature') || promptLower.includes('eco') || promptLower.includes('green') || promptLower.includes('wellness') || promptLower.includes('health') || promptLower.includes('botanical') || promptLower.includes('skincare')) {
         theme = 'wellness';
-        brandName = 'Flora & Co';
         primaryColor = '#2e7d32';
         logoBg = '#f1f8e9';
+        bannerUrl = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80';
         navLinks = [
           { text: 'Our Farms', url: 'https://example.com/farms' },
           { text: 'Botanicals', url: 'https://example.com/botanicals' },
           { text: 'Sustainability', url: 'https://example.com/green' }
         ];
-        ctaTitle = 'Reconnecting with Botanical Healing';
+        ctaTitle = `Organic Wellness from ${brandName}`;
         ctaBody = 'Harvested from organic, sustainable sources. Explore our freshly packaged collection of aromatherapy blends crafted to relax your body and soothe your mind.';
         ctaBtn = 'Explore Healing';
-      } else if (promptLower.includes('corp') || promptLower.includes('finance') || promptLower.includes('bank') || promptLower.includes('business') || promptLower.includes('consult')) {
+      } else if (promptLower.includes('corp') || promptLower.includes('finance') || promptLower.includes('bank') || promptLower.includes('business') || promptLower.includes('consult') || promptLower.includes('enterprise') || promptLower.includes('ledger') || promptLower.includes('apex')) {
         theme = 'enterprise';
-        brandName = 'Apex Ledger';
         primaryColor = '#0a2540';
         logoBg = '#f8f9fa';
+        bannerUrl = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80';
         navLinks = [
           { text: 'Enterprise Platform', url: 'https://example.com/platform' },
           { text: 'Pricing Matrix', url: 'https://example.com/pricing' },
           { text: 'Schedule Demo', url: 'https://example.com/demo' }
         ];
-        ctaTitle = 'Consolidate Marketing Infrastructure';
+        ctaTitle = `Consolidate ${brandName} Infrastructure`;
         ctaBody = 'Deliver maximum conversion metrics using high-fidelity inline image maps. Integrate enterprise-grade analytics tracking on every zone interaction.';
         ctaBtn = 'Request Case Study';
-      } else if (promptLower.includes('kid') || promptLower.includes('fun') || promptLower.includes('toy') || promptLower.includes('play') || promptLower.includes('festival')) {
+      } else if (promptLower.includes('kid') || promptLower.includes('fun') || promptLower.includes('toy') || promptLower.includes('play') || promptLower.includes('festival') || promptLower.includes('wonder')) {
         theme = 'playful';
-        brandName = 'Wonder Play';
         primaryColor = '#ff007f';
         logoBg = '#120010';
+        bannerUrl = 'https://images.unsplash.com/photo-1515488042361-404e9250afef?auto=format&fit=crop&w=1200&q=80';
         navLinks = [
           { text: 'Shop Toys', url: 'https://example.com/toys' },
           { text: 'Activity Kits', url: 'https://example.com/activities' },
           { text: 'Parent Portal', url: 'https://example.com/portal' }
         ];
-        ctaTitle = 'Unbox Infinite Joy & Learning!';
+        ctaTitle = `Unbox ${brandName} Joy & Learning!`;
         ctaBody = 'Check out our newly dropped creative activity packages. Full of vibrant accessories, interactive games, and toys built for healthy, imaginative play.';
         ctaBtn = 'Let\'s Play!';
-      } else if (promptLower.includes('sale') || promptLower.includes('shop') || promptLower.includes('fashion') || promptLower.includes('holiday') || promptLower.includes('black') || promptLower.includes('clothing')) {
+      } else if (promptLower.includes('sale') || promptLower.includes('shop') || promptLower.includes('fashion') || promptLower.includes('holiday') || promptLower.includes('black') || promptLower.includes('clothing') || promptLower.includes('vogue') || promptLower.includes('studio') || promptLower.includes('style') || promptLower.includes('apparel')) {
         theme = 'fashion';
-        brandName = 'Vogue Studio';
         primaryColor = '#d946ef';
         logoBg = '#09090b';
+        bannerUrl = 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80';
         navLinks = [
           { text: 'New Arrivals', url: 'https://example.com/new' },
           { text: 'Holiday Deals', url: 'https://example.com/deals' },
           { text: 'Style Guide', url: 'https://example.com/style' }
         ];
-        ctaTitle = 'HOLIDAY SAVINGS ARE OFFICIALLY LIVE';
+        ctaTitle = `${brandName.toUpperCase()} SAVINGS ARE OFFICIALLY LIVE`;
         ctaBody = 'Unlock early access items at up to 50% off. Seamless mapped sizing charts and priority checkout routing. Free express delivery on orders over $75.';
         ctaBtn = 'Claim 50% Off';
       } else {
-        // Dynamic builder based on prompt text keywords
-        const cleanPrompt = aiPrompt.replace(/[^a-zA-Z0-9\s]/g, '');
-        const words = cleanPrompt.split(/\s+/).filter(w => w.length > 2);
-        if (words.length > 0) {
-          brandName = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).slice(0, 3).join(' ') + ' Brand';
-        } else {
-          brandName = 'Custom Preset';
-        }
-        
+        // Dynamic builder based on custom keywords
         const colors = ['#00f0ff', '#ff007f', '#39ff14', '#ffbd2e', '#8b5cf6'];
         primaryColor = colors[Math.floor(Math.random() * colors.length)];
+        logoBg = '#07070a';
+        bannerUrl = 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80';
         
         ctaTitle = `Welcome to ${brandName}`;
         ctaBody = `Discover the next level of brand interactions using our mapped email image canvas. Tailored content optimized for your target audience: "${aiPrompt}".`;
       }
+
+      // Base64 dynamic SVG logo generator based on brand name and color
+      const generateSvgLogoBase64 = (name: string, color: string) => {
+        const initials = name.split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'NX';
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+            <defs>
+              <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${color}" />
+                <stop offset="100%" stop-color="#0066ff" />
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <rect width="200" height="60" rx="30" fill="#101018" stroke="#1d1d2c" stroke-width="1.5" />
+            <circle cx="35" cy="30" r="18" fill="url(#logo-grad)" opacity="0.85" filter="url(#glow)" />
+            <text x="35" y="35" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="900" fill="#07070a" text-anchor="middle" dominant-baseline="middle">${initials}</text>
+            <text x="68" y="30" font-family="'Outfit', 'Inter', system-ui, sans-serif" font-size="15" font-weight="bold" fill="#ffffff" letter-spacing="0.5" dominant-baseline="middle">${name}</text>
+          </svg>
+        `.trim();
+        return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+      };
+
+      const logoUrl = generateSvgLogoBase64(brandName, primaryColor);
+      const baseFallbackUrl = 'https://' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+
+      // Auto-map default interactive hotspots (Header/Logo + Center CTA)
+      const defaultHotspots: Hotspot[] = [
+        {
+          id: `ai-hotspot-logo-${Date.now()}`,
+          url: baseFallbackUrl,
+          left: 5,
+          top: 5,
+          width: 25,
+          height: 15,
+          label: `${brandName} Logo Header`
+        },
+        {
+          id: `ai-hotspot-cta-${Date.now()}`,
+          url: baseFallbackUrl + '/shop',
+          left: 30,
+          top: 60,
+          width: 40,
+          height: 25,
+          label: `Main CTA: ${ctaBtn}`
+        }
+      ];
 
       const steps = [
         `[ai] Initializing Novelleyx AI Generator...`,
@@ -144,6 +214,9 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
         `[ai] Deciding color palette matching: ${primaryColor}`,
         `[ai] Constructing header navigation elements...`,
         `[ai] Writing CTA marketing copy & action triggers...`,
+        `[ai] Generating base64 modern SVG Brand Logo...`,
+        `[ai] Fetching themed banner graphic CDN assets...`,
+        `[ai] Plotting default interactive hotspot mapping layers...`,
         `[ai] Performing local optimization compile...`,
         `[ai] Applying variables to active workspace state...`
       ];
@@ -162,10 +235,13 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
         updates.headerActive = true;
         updates.headerBgColor = logoBg;
         updates.headerTextColor = primaryColor;
+        updates.headerLogoUrl = logoUrl;
         updates.navLinks = navLinks;
         updates.ctaBgColor = primaryColor;
-        updates.fallbackUrl = 'https://' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
-        updates.ctaButtonUrl = 'https://' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+        updates.fallbackUrl = baseFallbackUrl;
+        updates.ctaButtonUrl = baseFallbackUrl;
+        updates.imageType = 'external';
+        updates.externalImageUrl = bannerUrl;
       }
       
       if (aiGenType === 'cta' || aiGenType === 'all') {
@@ -178,8 +254,12 @@ export const EmailSettings: React.FC<EmailSettingsProps> = ({
       }
 
       onChange(updates);
+      
+      if (aiGenType === 'brand' || aiGenType === 'all') {
+        onSetHotspots(defaultHotspots);
+      }
 
-      setAiLogs(prev => [...prev, `[success] Novelleyx AI successfully automated the settings panel!`]);
+      setAiLogs(prev => [...prev, `[success] Novelleyx AI successfully automated the settings panel & hotspot canvas!`]);
     } catch (err: any) {
       console.error(err);
       setAiLogs(prev => [...prev, `[error] AI engine error: ${err?.message || err}`]);

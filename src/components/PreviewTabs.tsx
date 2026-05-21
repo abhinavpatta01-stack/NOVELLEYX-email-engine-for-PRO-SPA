@@ -65,7 +65,7 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({
         <p className="text-muted mt-5 mb-15">Open the responsive campaign in a clean, full-size browser window to test the hotspots.</p>
         <button
           type="button"
-          className="btn-submit flex-row align-center gap-10 py-12 px-24"
+          className="btn-submit flex-row align-center justify-center gap-10 py-12 px-24"
           style={{ width: 'auto', background: 'linear-gradient(90deg, var(--neon-cyan), #0066ff)', color: '#07070a', fontWeight: 'bold' }}
           onClick={handlePreview}
           disabled={!htmlCode}
@@ -76,18 +76,18 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({
       </div>
 
       {/* 2. Download Mapped Image (Image + Map tags) */}
-      <div className="deploy-card glassmorphism-dark p-15 border-dim">
-        <div className="flex-row align-center gap-10 mb-10">
+      <div className="deploy-card glassmorphism-dark p-15 border-dim text-center flex-col align-center">
+        <div className="flex-row align-center justify-center gap-10 mb-10">
           <Code className="icon-neon-cyan" size={18} />
           <h5 className="m-0 text-white">Mapped Image Code Only</h5>
         </div>
         <p className="text-muted mb-15" style={{ fontSize: '11px', lineHeight: '16px' }}>
           Exports just the image tag and the coordinate maps. Copy or download this snippet to paste directly into Mailchimp, Klaviyo, HubSpot, or custom templates.
         </p>
-        <div className="flex-row gap-10">
+        <div className="flex-row justify-center gap-10 w-100">
           <button
             type="button"
-            className="action-pill btn-copy flex-1 py-8"
+            className="action-pill btn-copy flex-1 py-8 flex-row align-center justify-center gap-5"
             onClick={handleCopyMap}
             disabled={!imageMapOnlyHtml}
           >
@@ -106,7 +106,7 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({
           
           <button
             type="button"
-            className="action-pill btn-download flex-1 py-8"
+            className="action-pill btn-download flex-1 py-8 flex-row align-center justify-center gap-5"
             onClick={handleDownloadMap}
             disabled={!imageMapOnlyHtml}
           >
@@ -117,8 +117,8 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({
       </div>
 
       {/* 3. Send campaign */}
-      <div className="deploy-card glassmorphism-dark p-15 border-dim">
-        <div className="flex-row align-center gap-10 mb-10">
+      <div className="deploy-card glassmorphism-dark p-15 border-dim text-center flex-col align-center">
+        <div className="flex-row align-center justify-center gap-10 mb-10">
           <Send className="icon-neon-cyan" size={18} />
           <h5 className="m-0 text-white">Direct Email Dispatch</h5>
         </div>
@@ -139,6 +139,7 @@ export const PreviewTabs: React.FC<PreviewTabsProps> = ({
 
     </div>
   );
+
 };
 
 export default PreviewTabs;

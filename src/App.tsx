@@ -7,7 +7,7 @@ import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
 import { SendEmailModal } from './components/SendEmailModal';
 import { generateEmailHtml, generateImageMapOnlyHtml } from './utils/emailGenerator';
-import { Sparkles, Layers, BookOpen } from 'lucide-react';
+import { Sparkles, Layers, BookOpen, Sliders } from 'lucide-react';
 
 // Default mock image for instant WOW factor when loading the editor
 const DEFAULT_PRESET_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
@@ -218,15 +218,21 @@ export const App: React.FC = () => {
       isEditing: true,
       hotspotId: id,
       initialUrl: hotspot.url,
-      initialLabel: hotspot.label
+      initialLabel: hotspot.label,
+      pendingHotspotCoords: {
+        left: hotspot.left,
+        top: hotspot.top,
+        width: hotspot.width,
+        height: hotspot.height
+      }
     });
   };
 
-  const handleSaveHotspot = (url: string, label: string) => {
+  const handleSaveHotspot = (url: string, label: string, coords?: { left: number; top: number; width: number; height: number }) => {
     if (modalState.isEditing && modalState.hotspotId) {
       // Apply edit
       setHotspots(prev => prev.map(h => 
-        h.id === modalState.hotspotId ? { ...h, url, label } : h
+        h.id === modalState.hotspotId ? { ...h, url, label, ...(coords || {}) } : h
       ));
     } else if (modalState.pendingHotspotCoords) {
       // Create new
@@ -234,7 +240,8 @@ export const App: React.FC = () => {
         id: 'hotspot_' + Date.now(),
         url,
         label,
-        ...modalState.pendingHotspotCoords
+        ...modalState.pendingHotspotCoords,
+        ...(coords || {})
       };
       setHotspots(prev => [...prev, newHotspot]);
       setSelectedId(newHotspot.id);
@@ -287,7 +294,33 @@ export const App: React.FC = () => {
           <Sparkles className="icon-neon-cyan bounce-subtle" size={24} />
           <h1>Novelleyx Email Engine <span className="logo-pro-badge">PRO</span></h1>
         </div>
-        <div className="branding-nav" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div className="branding-nav" style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+          <button 
+            type="button"
+            className="btn-submit"
+            style={{
+              padding: '6px 12px',
+              fontSize: '11px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-dim)',
+              color: '#fff',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              document.querySelector('.sidebar-col')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <Sliders size={12} className="icon-neon-cyan" />
+            <span>Settings</span>
+          </button>
           <a 
             href={import.meta.env.BASE_URL + 'user_guide.html'} 
             target="_blank" 
@@ -332,6 +365,7 @@ export const App: React.FC = () => {
             onDeletePreset={handleDeletePreset}
             onImageUpload={handleImageUpload}
             base64Image={base64Image}
+            onSetHotspots={setHotspots}
           />
         </aside>
 
@@ -378,6 +412,7 @@ export const App: React.FC = () => {
         onSave={handleSaveHotspot}
         initialUrl={modalState.initialUrl}
         initialLabel={modalState.initialLabel}
+        initialCoords={modalState.pendingHotspotCoords}
       />
 
       {/* Direct Sending & Attachments Modal */}
@@ -387,6 +422,18 @@ export const App: React.FC = () => {
         htmlCode={compiledHtml}
         companyName={config.companyName}
       />
+
+      {/* Floating Settings Button for Mobile */}
+      <button 
+        type="button" 
+        className="floating-settings-btn"
+        onClick={() => {
+          document.querySelector('.sidebar-col')?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      >
+        <Sliders size={16} />
+        <span>Settings</span>
+      </button>
     </div>
   );
 };

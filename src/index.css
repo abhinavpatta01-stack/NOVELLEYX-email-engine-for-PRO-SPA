@@ -1413,4 +1413,68 @@ input:checked + .slider:before {
   }
 }
 
+/* Centering Utilities */
+.text-center {
+  text-align: center !important;
+}
+.justify-center {
+  justify-content: center !important;
+}
 
+/* Floating Settings Button for Mobile */
+.floating-settings-btn {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .floating-settings-btn {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+    background: linear-gradient(90deg, var(--neon-cyan), #0066ff);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 12px;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease-in-out;
+  }
+  .floating-settings-btn:active {
+    transform: scale(0.95);
+  }
+  .settings-panel {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* Mobile Touch Hotspot Optimizations */
+@media (max-width: 768px) {
+  .resize-handle {
+    width: 20px !important;
+    height: 20px !important;
+    bottom: -8px !important;
+    right: -8px !important;
+    border-radius: 50% !important;
+    background: var(--neon-cyan) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.6) !important;
+  }
+  .hotspot-actions {
+    bottom: -36px !important;
+    padding: 6px !important;
+    gap: 8px !important;
+  }
+  .action-btn {
+    padding: 8px 10px !important;
+  }
+}
