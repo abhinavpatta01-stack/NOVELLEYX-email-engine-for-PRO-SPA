@@ -5,13 +5,14 @@ export function generateEmailHtml(
   hotspots: Hotspot[],
   base64Image: string,
   originalWidth: number,
-  originalHeight: number
+  originalHeight: number,
+  emailWidth: number = 600,
+  targetBlank: boolean = true
 ): string {
   const companyName = config.companyName || "Our Brand";
   const mainUrl = config.fallbackUrl || "#";
 
-  // Calculate email height based on 600px email width
-  const emailWidth = 600;
+  // Calculate email height based on configured email width
   const emailHeight = Math.round(emailWidth * (originalHeight / originalWidth)) || 400;
 
   // Image source: base64 or external url
@@ -31,7 +32,7 @@ export function generateEmailHtml(
       const x2 = Math.round(((h.left + h.width) / 100) * emailWidth);
       const y2 = Math.round(((h.top + h.height) / 100) * emailHeight);
       
-      return `<area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${h.url}" target="_blank" alt="${h.label || `Link ${index + 1}`}">`;
+      return `<area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${h.url}" target="${targetBlank ? '_blank' : '_self'}" alt="${h.label || `Link ${index + 1}`}">`;
     }).join('\n                                ');
 
     mapHtml = `<map name="emailMap_${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}">\n                                ${areasHtml}\n                            </map>`;
@@ -52,7 +53,7 @@ export function generateEmailHtml(
               <tr>
                 ${config.navLinks.map((link, idx) => `
                   <td style="padding: 0 10px; font-family: Arial, sans-serif; font-size: 13px;">
-                    <a href="${link.url}" target="_blank" style="color: ${config.headerTextColor}; text-decoration: none; font-weight: 500;">${link.text}</a>
+                    <a href="${link.url}" target="${targetBlank ? '_blank' : '_self'}" style="color: ${config.headerTextColor}; text-decoration: none; font-weight: 500;">${link.text}</a>
                   </td>
                   ${idx < config.navLinks.length - 1 ? `<td style="color: ${config.headerTextColor}; opacity: 0.5; font-size: 13px;">|</td>` : ''}
                 `).join('')}
@@ -73,7 +74,7 @@ export function generateEmailHtml(
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tr>
               <td align="center">
-                <a href="${mainUrl}" target="_blank" style="text-decoration: none;">
+                <a href="${mainUrl}" target="${targetBlank ? '_blank' : '_self'}" style="text-decoration: none;">
                   ${brandLogoHtml}
                 </a>
               </td>
@@ -108,7 +109,7 @@ export function generateEmailHtml(
                 <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                   <tr>
                     <td align="center" bgcolor="${config.ctaBgColor}" style="border-radius: 4px;">
-                      <a href="${config.ctaButtonUrl || mainUrl}" target="_blank" style="display: inline-block; padding: 12px 30px; font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; color: ${config.ctaTextColor}; text-decoration: none; border-radius: 4px; border: 1px solid ${config.ctaBgColor};">
+                      <a href="${config.ctaButtonUrl || mainUrl}" target="${targetBlank ? '_blank' : '_self'}" style="display: inline-block; padding: 12px 30px; font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; color: ${config.ctaTextColor}; text-decoration: none; border-radius: 4px; border: 1px solid ${config.ctaBgColor};">
                         ${config.ctaButtonText}
                       </a>
                     </td>
@@ -147,7 +148,7 @@ export function generateEmailHtml(
               <tr>
                 ${activeSocials.map(s => `
                   <td style="padding: 0 10px;">
-                    <a href="${s.url}" target="_blank">
+                    <a href="${s.url}" target="${targetBlank ? '_blank' : '_self'}">
                       <img src="${iconUrls[s.platform]}" alt="${s.platform}" width="24" height="24" style="display: block; width: 24px; height: 24px; border: 0; outline: none;">
                     </a>
                   </td>
@@ -177,9 +178,9 @@ export function generateEmailHtml(
             <tr>
               <td align="center" style="padding-top: 12px; font-family: Arial, sans-serif; font-size: 11px;">
                 You are receiving this email because you opted in at <a href="${mainUrl}" style="color: #666666; text-decoration: underline;">our website</a>.<br>
-                <a href="${mainUrl}/unsubscribe" target="_blank" style="color: #888888; text-decoration: underline; margin: 0 5px;">Unsubscribe</a> | 
-                <a href="${mainUrl}/privacy" target="_blank" style="color: #888888; text-decoration: underline; margin: 0 5px;">Privacy Policy</a> | 
-                <a href="${mainUrl}/support" target="_blank" style="color: #888888; text-decoration: underline; margin: 0 5px;">Contact Support</a>
+                <a href="${mainUrl}/unsubscribe" target="${targetBlank ? '_blank' : '_self'}" style="color: #888888; text-decoration: underline; margin: 0 5px;">Unsubscribe</a> | 
+                <a href="${mainUrl}/privacy" target="${targetBlank ? '_blank' : '_self'}" style="color: #888888; text-decoration: underline; margin: 0 5px;">Privacy Policy</a> | 
+                <a href="${mainUrl}/support" target="${targetBlank ? '_blank' : '_self'}" style="color: #888888; text-decoration: underline; margin: 0 5px;">Contact Support</a>
               </td>
             </tr>
           </table>
@@ -203,8 +204,8 @@ export function generateEmailHtml(
         body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f4f4f7; }
         
         /* Mobile responsive adjustments */
-        @media screen and (max-width: 600px) {
-            .email-container { width: 100% !important; max-width: 600px !important; }
+        @media screen and (max-width: ${emailWidth}px) {
+            .email-container { width: 100% !important; max-width: ${emailWidth}px !important; }
             .fluid-img { width: 100% !important; height: auto !important; max-width: 100% !important; }
         }
     </style>
@@ -214,15 +215,15 @@ export function generateEmailHtml(
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
             <td align="center" style="padding: 20px 0;">
-                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container" style="max-width: ${emailWidth}px; background-color: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                     
                     ${headerHtml}
 
                     <!-- MAIN HERO BANNER (MAPPED IMAGE) -->
                     <tr>
                         <td align="center" style="font-size: 0; line-height: 0;">
-                            <a href="${mainUrl}" target="_blank" style="display: block; text-decoration: none; border: 0; outline: none;">
-                                <img src="${imgSrc}" width="600" ${useMapAttr} alt="Promotional Offer" class="fluid-img" style="display: block; width: 100%; max-width: 600px; height: auto; border: 0; outline: none;">
+                            <a href="${mainUrl}" target="${targetBlank ? '_blank' : '_self'}" style="display: block; text-decoration: none; border: 0; outline: none;">
+                                <img src="${imgSrc}" width="${emailWidth}" ${useMapAttr} alt="Promotional Offer" class="fluid-img" style="display: block; width: 100%; max-width: ${emailWidth}px; height: auto; border: 0; outline: none;">
                             </a>
                             ${mapHtml}
                         </td>
@@ -244,10 +245,11 @@ export function generateImageMapOnlyHtml(
   hotspots: Hotspot[],
   base64Image: string,
   originalWidth: number,
-  originalHeight: number
+  originalHeight: number,
+  emailWidth: number = 600,
+  targetBlank: boolean = true
 ): string {
   const companyName = config.companyName || "Our Brand";
-  const emailWidth = 600;
   const emailHeight = Math.round(emailWidth * (originalHeight / originalWidth)) || 400;
 
   const imgSrc = config.imageType === 'base64'
@@ -264,7 +266,7 @@ export function generateImageMapOnlyHtml(
       const y1 = Math.round((h.top / 100) * emailHeight);
       const x2 = Math.round(((h.left + h.width) / 100) * emailWidth);
       const y2 = Math.round(((h.top + h.height) / 100) * emailHeight);
-      return `<area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${h.url}" target="_blank" alt="${h.label || `Link ${index + 1}`}">`;
+      return `<area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${h.url}" target="${targetBlank ? '_blank' : '_self'}" alt="${h.label || `Link ${index + 1}`}">`;
     }).join('\n  ');
 
     mapHtml = `\n<map name="${mapName}">\n  ${areasHtml}\n</map>`;

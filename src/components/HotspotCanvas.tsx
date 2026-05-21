@@ -11,6 +11,8 @@ interface HotspotCanvasProps {
   onUpdateHotspot: (id: string, updates: Partial<Hotspot>) => void;
   onDeleteHotspot: (id: string) => void;
   onOpenSettings: (id: string) => void;
+  snapGridSize?: number;
+  canvasMaxWidth?: number;
 }
 
 type Mode = 'idle' | 'drawing' | 'moving' | 'resizing';
@@ -23,7 +25,9 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
   onAddHotspot,
   onUpdateHotspot,
   onDeleteHotspot,
-  onOpenSettings
+  onOpenSettings,
+  snapGridSize = 0,
+  canvasMaxWidth = 600
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -44,8 +48,13 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
     const rect = containerRef.current.getBoundingClientRect();
     
     // Boundary check
-    const x = ((clientX - rect.left) / rect.width) * 100;
-    const y = ((clientY - rect.top) / rect.height) * 100;
+    let x = ((clientX - rect.left) / rect.width) * 100;
+    let y = ((clientY - rect.top) / rect.height) * 100;
+    
+    if (snapGridSize > 0) {
+      x = Math.round(x / snapGridSize) * snapGridSize;
+      y = Math.round(y / snapGridSize) * snapGridSize;
+    }
     
     return {
       x: Math.max(0, Math.min(100, x)),
@@ -238,6 +247,15 @@ export const HotspotCanvas: React.FC<HotspotCanvasProps> = ({
       <div 
         ref={containerRef}
         className={`canvas-container ${!base64Image ? 'disabled' : ''}`}
+        style={{
+          maxWidth: `${canvasMaxWidth}px`,
+          margin: '0 auto',
+          backgroundImage: snapGridSize > 0 ? `
+            linear-gradient(to right, rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 240, 255, 0.08) 1px, transparent 1px)
+          ` : undefined,
+          backgroundSize: snapGridSize > 0 ? `${snapGridSize}% ${snapGridSize}%` : undefined
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

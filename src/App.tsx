@@ -6,6 +6,7 @@ import { HotspotList } from './components/HotspotList';
 import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
 import { SendEmailModal } from './components/SendEmailModal';
+import { AdvancedSettingsModal } from './components/AdvancedSettingsModal';
 import { generateEmailHtml, generateImageMapOnlyHtml } from './utils/emailGenerator';
 import { Sparkles, Layers, BookOpen, Sliders } from 'lucide-react';
 
@@ -88,6 +89,11 @@ export const App: React.FC = () => {
 
   // Modal states
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [canvasMaxWidth, setCanvasMaxWidth] = useState<number>(600);
+  const [snapGridSize, setSnapGridSize] = useState<number>(0);
+  const [targetBlank, setTargetBlank] = useState<boolean>(true);
+  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState<boolean>(false);
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     isEditing: boolean;
@@ -103,12 +109,13 @@ export const App: React.FC = () => {
     initialLabel: ''
   });
 
-  // Load Presets on Init
+  // Load Presets and saved campaign configs on Init
   useEffect(() => {
-    const saved = localStorage.getItem('novelleyx_email_presets');
-    if (saved) {
+    // 1. Presets
+    const savedPresets = localStorage.getItem('novelleyx_email_presets');
+    if (savedPresets) {
       try {
-        setPresets(JSON.parse(saved));
+        setPresets(JSON.parse(savedPresets));
       } catch {
         setPresets(SYSTEM_DEFAULT_PRESETS);
       }
@@ -116,7 +123,134 @@ export const App: React.FC = () => {
       setPresets(SYSTEM_DEFAULT_PRESETS);
       localStorage.setItem('novelleyx_email_presets', JSON.stringify(SYSTEM_DEFAULT_PRESETS));
     }
+
+    // 2. Config
+    const savedConfig = localStorage.getItem('novelleyx_campaign_config');
+    if (savedConfig) {
+      try {
+        setConfig(JSON.parse(savedConfig));
+      } catch (err) {
+        console.warn("Failed to load saved config", err);
+      }
+    }
+
+    // 3. Hotspots
+    const savedHotspots = localStorage.getItem('novelleyx_campaign_hotspots');
+    if (savedHotspots) {
+      try {
+        setHotspots(JSON.parse(savedHotspots));
+      } catch (err) {
+        console.warn("Failed to load saved hotspots", err);
+      }
+    }
+
+    // 4. Image
+    const savedImage = localStorage.getItem('novelleyx_campaign_image');
+    if (savedImage) {
+      setBase64Image(savedImage);
+    }
+
+    // 5. Advanced settings
+    const savedAdv = localStorage.getItem('novelleyx_email_adv_settings');
+    if (savedAdv) {
+      try {
+        const parsed = JSON.parse(savedAdv);
+        if (parsed.canvasMaxWidth !== undefined) setCanvasMaxWidth(Number(parsed.canvasMaxWidth));
+        if (parsed.snapGridSize !== undefined) setSnapGridSize(Number(parsed.snapGridSize));
+        if (parsed.targetBlank !== undefined) setTargetBlank(Boolean(parsed.targetBlank));
+      } catch (err) {
+        console.warn("Failed to load advanced settings", err);
+      }
+    }
   }, []);
+
+  // Autosave settings & campaign state
+  useEffect(() => {
+    try {
+      localStorage.setItem('novelleyx_email_adv_settings', JSON.stringify({
+        canvasMaxWidth,
+        snapGridSize,
+        targetBlank
+      }));
+    } catch (e) {
+      console.warn("localStorage save failed for adv settings", e);
+    }
+  }, [canvasMaxWidth, snapGridSize, targetBlank]);
+
+  useEffect(() => {
+    if (config) {
+      try {
+        localStorage.setItem('novelleyx_campaign_config', JSON.stringify(config));
+      } catch (e) {
+        console.warn("localStorage save failed for config", e);
+      }
+    }
+  }, [config]);
+
+  useEffect(() => {
+    if (hotspots) {
+      try {
+        localStorage.setItem('novelleyx_campaign_hotspots', JSON.stringify(hotspots));
+      } catch (e) {
+        console.warn("localStorage save failed for hotspots", e);
+      }
+    }
+  }, [hotspots]);
+
+  useEffect(() => {
+    if (base64Image) {
+      try {
+        localStorage.setItem('novelleyx_campaign_image', base64Image);
+      } catch (e) {
+        console.warn("localStorage save failed for base64 image (likely space quota limits)", e);
+      }
+    } else {
+      localStorage.removeItem('novelleyx_campaign_image');
+    }
+  }, [base64Image]);
+
+  const handleHardReset = () => {
+    // Clear localStorage Campaign metadata
+    localStorage.removeItem('novelleyx_email_presets');
+    localStorage.removeItem('novelleyx_campaign_config');
+    localStorage.removeItem('novelleyx_campaign_hotspots');
+    localStorage.removeItem('novelleyx_campaign_image');
+    localStorage.removeItem('novelleyx_email_adv_settings');
+
+    // Reset React state variables to default values
+    setPresets(SYSTEM_DEFAULT_PRESETS);
+    localStorage.setItem('novelleyx_email_presets', JSON.stringify(SYSTEM_DEFAULT_PRESETS));
+
+    setConfig({
+      companyName: 'Novelleyx',
+      fallbackUrl: 'https://novelleyx.com',
+      preheader: 'Check out our latest interactive updates! ⚡',
+      headerActive: true,
+      headerLogoUrl: '',
+      headerBgColor: '#101018',
+      headerTextColor: '#00f0ff',
+      navLinks: [...DEFAULT_NAV_LINKS],
+      imageType: 'external',
+      externalImageUrl: DEFAULT_PRESET_IMAGE,
+      ctaActive: true,
+      ctaTitle: 'Ready to elevate your marketing campaigns?',
+      ctaBody: 'Create interactive mapped images with multiple click targets inside a single high-performance email template. Start boosting your Click-Through Rate (CTR) today.',
+      ctaButtonText: 'Try Engine Pro Now',
+      ctaButtonUrl: 'https://novelleyx.com',
+      ctaBgColor: '#00f0ff',
+      ctaTextColor: '#07070a',
+      footerActive: true,
+      footerText: '© 2026 Novelleyx Technology Inc. 456 Tech Circle, Suite 100, San Francisco, CA.',
+      socialActive: true,
+      socialLinks: [...DEFAULT_SOCIAL_LINKS]
+    });
+    setHotspots([]);
+    setSelectedId(null);
+    setBase64Image('');
+    setCanvasMaxWidth(600);
+    setSnapGridSize(0);
+    setTargetBlank(true);
+  };
 
   // Pre-load default preset external image size on start
   useEffect(() => {
@@ -273,9 +407,11 @@ export const App: React.FC = () => {
       hotspots,
       base64Image,
       imgDimensions.width,
-      imgDimensions.height
+      imgDimensions.height,
+      canvasMaxWidth,
+      targetBlank
     );
-  }, [config, hotspots, base64Image, imgDimensions]);
+  }, [config, hotspots, base64Image, imgDimensions, canvasMaxWidth, targetBlank]);
 
   const compiledImageMapOnlyHtml = useMemo(() => {
     return generateImageMapOnlyHtml(
@@ -283,9 +419,11 @@ export const App: React.FC = () => {
       hotspots,
       base64Image,
       imgDimensions.width,
-      imgDimensions.height
+      imgDimensions.height,
+      canvasMaxWidth,
+      targetBlank
     );
-  }, [config, hotspots, base64Image, imgDimensions]);
+  }, [config, hotspots, base64Image, imgDimensions, canvasMaxWidth, targetBlank]);
 
   return (
     <div className="container-root animate-fade-in">
@@ -315,7 +453,7 @@ export const App: React.FC = () => {
               transition: 'all 0.3s ease'
             }}
             onClick={() => {
-              document.querySelector('.sidebar-col')?.scrollIntoView({ behavior: 'smooth' });
+              setIsAdvancedSettingsOpen(true);
             }}
           >
             <Sliders size={12} className="icon-neon-cyan" />
@@ -380,6 +518,8 @@ export const App: React.FC = () => {
             onUpdateHotspot={handleUpdateHotspotCoords}
             onDeleteHotspot={handleDeleteHotspot}
             onOpenSettings={triggerEditHotspot}
+            snapGridSize={snapGridSize}
+            canvasMaxWidth={canvasMaxWidth}
           />
 
           <HotspotList
@@ -423,12 +563,31 @@ export const App: React.FC = () => {
         companyName={config.companyName}
       />
 
+      {/* Advanced Settings Modal Dashboard */}
+      <AdvancedSettingsModal
+        isOpen={isAdvancedSettingsOpen}
+        onClose={() => setIsAdvancedSettingsOpen(false)}
+        canvasMaxWidth={canvasMaxWidth}
+        setCanvasMaxWidth={setCanvasMaxWidth}
+        snapGridSize={snapGridSize}
+        setSnapGridSize={setSnapGridSize}
+        targetBlank={targetBlank}
+        setTargetBlank={setTargetBlank}
+        config={config}
+        setConfig={setConfig}
+        hotspots={hotspots}
+        setHotspots={setHotspots}
+        base64Image={base64Image}
+        setBase64Image={setBase64Image}
+        onHardReset={handleHardReset}
+      />
+
       {/* Floating Settings Button for Mobile */}
       <button 
         type="button" 
         className="floating-settings-btn"
         onClick={() => {
-          document.querySelector('.sidebar-col')?.scrollIntoView({ behavior: 'smooth' });
+          setIsAdvancedSettingsOpen(true);
         }}
       >
         <Sliders size={16} />
