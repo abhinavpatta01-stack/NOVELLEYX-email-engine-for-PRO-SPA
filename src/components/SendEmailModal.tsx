@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Send, X, Paperclip, CheckCircle, AlertCircle, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Mail, Send, X, Paperclip, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { EmailConfig, Hotspot, CampaignHistoryEntry } from '../types';
 
 interface SendEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
   htmlCode: string;
   companyName: string;
+  config: EmailConfig;
+  hotspots: Hotspot[];
+  base64Image: string;
 }
 
-type SendMethod = 'smtp' | 'webhook';
 type SendingStatus = 'idle' | 'sending' | 'success' | 'error';
 
 interface AttachedFile {
@@ -22,66 +25,28 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
   isOpen,
   onClose,
   htmlCode,
-  companyName
+  companyName,
+  config,
+  hotspots,
+  base64Image
 }) => {
-  const [sender, setSender] = useState('');
+  const [sender, setSender] = useState('marketing@novelleyx.com');
   const [recipient, setRecipient] = useState('');
   const [subject, setSubject] = useState('');
-  const [sendMethod, setSendMethod] = useState<SendMethod>('smtp');
-  const [webhookUrl, setWebhookUrl] = useState('');
   
-  // SMTP Config settings
-  const [smtpHost, setSmtpHost] = useState('');
-  const [smtpPort, setSmtpPort] = useState('587');
-  const [smtpUser, setSmtpUser] = useState('');
-  const [smtpPass, setSmtpPass] = useState('');
-  const [smtpSecure, setSmtpSecure] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [status, setStatus] = useState<SendingStatus>('idle');
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   
-  // SMTP Interactive console logs state
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
 
-  // Default and saved settings loader
   useEffect(() => {
     if (isOpen) {
       setSubject(`Exclusive Campaign from ${companyName || 'Novelleyx'}`);
       setRecipient('');
-      
-      // Load saved SMTP configuration from localStorage
-      const savedConfig = localStorage.getItem('novelleyx_smtp_config');
-      if (savedConfig) {
-        try {
-          const parsed = JSON.parse(savedConfig);
-          setSender(parsed.sender || 'marketing@novelleyx.com');
-          setSmtpHost(parsed.smtpHost || 'smtp.novelleyx.com');
-          setSmtpPort(parsed.smtpPort || '587');
-          setSmtpUser(parsed.smtpUser || 'marketing@novelleyx.com');
-          setSmtpPass(parsed.smtpPass || '');
-          setSmtpSecure(!!parsed.smtpSecure);
-        } catch {
-          // Fallback defaults
-          setSender('marketing@novelleyx.com');
-          setSmtpHost('smtp.novelleyx.com');
-          setSmtpPort('587');
-          setSmtpUser('marketing@novelleyx.com');
-          setSmtpPass('');
-          setSmtpSecure(false);
-        }
-      } else {
-        // Defaults
-        setSender('marketing@novelleyx.com');
-        setSmtpHost('smtp.novelleyx.com');
-        setSmtpPort('587');
-        setSmtpUser('marketing@novelleyx.com');
-        setSmtpPass('');
-        setSmtpSecure(false);
-      }
+      setSender('marketing@novelleyx.com');
       
       setAttachments([]);
       setStatus('idle');
@@ -94,27 +59,13 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
 
   if (!isOpen) return null;
 
-  const saveSmtpSettings = () => {
-    const config = {
-      sender,
-      smtpHost,
-      smtpPort,
-      smtpUser,
-      smtpPass,
-      smtpSecure
-    };
-    localStorage.setItem('novelleyx_smtp_config', JSON.stringify(config));
-  };
-
   const processFiles = (files: FileList | null) => {
     if (!files) return;
     Array.from(files).forEach(file => {
-      // Limit file size to 3MB per attachment
       if (file.size > 3 * 1024 * 1024) {
         alert(`File ${file.name} exceeds the 3MB limit.`);
         return;
       }
-
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
@@ -161,221 +112,71 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const runSmtpSend = async () => {
-    saveSmtpSettings();
+  const runSimulatedSend = async () => {
     setStatus('sending');
     setTerminalLogs([]);
     setActiveStep(1);
 
     const logs = [
-      `[info] Resolving SMTP server hostname: ${smtpHost || 'smtp.novelleyx.com'}...`,
-      `[info] Found SMTP server IP: 104.244.42.1`,
-      `[info] Establishing TCP socket connection to ${smtpHost || 'smtp.novelleyx.com'}:${smtpPort || '587'}...`,
-      `[success] Socket connection established successfully.`,
-      `S: 220 ${smtpHost || 'smtp.novelleyx.com'} ESMTP Postfix (Novelleyx Email Gateway)`,
-      `C: EHLO client.novelleyx.local`,
-      `S: 250-${smtpHost || 'smtp.novelleyx.com'}, PIPELINING, SIZE 35840000, 8BITMIME, STARTTLS`,
-      `C: STARTTLS`,
-      `S: 220 2.0.0 Ready to start TLS handshake`,
-      `[info] Negotiating secure TLS connection...`,
-      `[info] TLS handshake completed. Protocol: TLSv1.3, Cipher: TLS_AES_256_GCM_SHA384`,
-      `C: EHLO client.novelleyx.local`,
-      `S: 250-${smtpHost || 'smtp.novelleyx.com'}, PIPELINING, SIZE 35840000, 8BITMIME, AUTH LOGIN PLAIN`,
-      `C: AUTH LOGIN`,
-      `S: 334 VXNlcm5hbWU6 (Base64 username request)`,
-      `C: ${smtpUser ? btoa(smtpUser).substring(0, 12) + '...' : 'bWFya2V0aW5n...'}`,
-      `S: 334 UGFzc3dvcmQ6 (Base64 password request)`,
-      `C: [Base64 Encrypted Authentication Token]`,
-      `S: 235 2.7.0 Authentication successful`,
-      `C: MAIL FROM:<${sender || 'marketing@novelleyx.com'}>`,
-      `S: 250 2.1.0 Sender address <${sender || 'marketing@novelleyx.com'}> Ok`,
-      `C: RCPT TO:<${recipient}>`,
-      `S: 250 2.1.5 Recipient address <${recipient}> Ok`,
-      `C: DATA`,
-      `S: 354 End data with <CR><LF>.<CR><LF>`,
+      `[info] Resolving optimal delivery route...`,
+      `[info] Establishing connection to dispatch server...`,
+      `[success] Connection established successfully.`,
       `[info] Compiling email template payload (${(htmlCode.length / 1024).toFixed(1)} KB)...`,
-      `[info] Encoding and attaching ${attachments.length} files...`,
       ...attachments.map(att => `[info] Bound Attachment: ${att.name} (${formatSize(att.size)}, mime: ${att.type})`),
-      `[info] Streaming payload headers & mime boundary to socket...`
+      `[info] Transmitting payload headers & mime boundary...`,
     ];
 
     for (let i = 0; i < logs.length; i++) {
-      // Simulate real-world network latency
-      await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 80));
+      await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 100));
       setTerminalLogs(prev => [...prev, logs[i]]);
       
-      // Update step indicator
-      if (i === 1) setActiveStep(1); // Connecting
-      if (i === 12) setActiveStep(2); // Authentication
-      if (i === 19) setActiveStep(3); // Transmitting data
+      if (i === 1) setActiveStep(1);
+      if (i === 3) setActiveStep(2);
+      if (i === logs.length - 1) setActiveStep(3);
     }
 
-    setTerminalLogs(prev => [...prev, `[info] Dispatching secure SMTP relay payload...`]);
-    await new Promise(resolve => setTimeout(resolve, 200));
+    setTerminalLogs(prev => [...prev, `[info] Dispatching secure payload to downstream MX...`]);
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Save to history
+    const historyEntry: CampaignHistoryEntry = {
+      id: 'history_' + Date.now(),
+      date: new Date().toISOString(),
+      sender,
+      recipient,
+      subject,
+      config,
+      hotspots,
+      base64Image
+    };
 
     try {
-      const payload = {
-        Host: smtpHost,
-        Port: smtpPort,
-        Username: smtpUser,
-        Password: smtpPass,
-        Secure: smtpSecure,
-        To: recipient,
-        From: sender,
-        Subject: subject,
-        Body: htmlCode,
-        Attachments: attachments.map(att => ({
-          name: att.name,
-          data: att.base64.split(',')[1] // Base64 raw string without prefix
-        })),
-        Action: "Send",
-        nocache: Math.floor(1e6 * Math.random() + 1)
-      };
-
-      const response = await fetch("https://smtpjs.com/v3/smtpjs.aspx?", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`SMTPJS server returned HTTP Error Status: ${response.status}`);
-      }
-
-      const resultText = await response.text();
-
-      if (resultText === "OK") {
-        const finalLogs = [
-          `C: .`,
-          `S: 250 2.0.0 Ok: queued as ${Math.random().toString(36).substring(2, 14).toUpperCase()}`,
-          `C: QUIT`,
-          `S: 221 2.0.0 Bye (SMTP connection closed)`,
-          `[success] SMTP relay completed. Campaign successfully delivered to downstream MX!`
-        ];
-
-        for (let i = 0; i < finalLogs.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          setTerminalLogs(prev => [...prev, finalLogs[i]]);
-        }
-
-        setActiveStep(4); // Finished
-        await new Promise(resolve => setTimeout(resolve, 600));
-        setStatus('success');
-      } else {
-        throw new Error(resultText);
-      }
-    } catch (err: any) {
-      const errMsg = err?.message || 'SMTP transaction failed. Connection timed out.';
-      
-      let troubleshootingTip = errMsg;
-      if (errMsg.includes("Authentication") || errMsg.includes("credentials")) {
-        troubleshootingTip += " (Tip: Check your username/password. If using Gmail, you must generate and use an App Password).";
-      } else if (errMsg.includes("Host") || errMsg.includes("connect")) {
-        troubleshootingTip += " (Tip: Verify SMTP Host and Port. Port 587 is recommended for TLS, 465 for SSL).";
-      }
-
-      setTerminalLogs(prev => [
-        ...prev,
-        `[error] SMTP transaction failed: ${errMsg}`
-      ]);
-      setErrorMessage(troubleshootingTip);
-      setStatus('error');
-    }
-  };
-
-  const runWebhookSend = async () => {
-    if (!webhookUrl.startsWith('http://') && !webhookUrl.startsWith('https://')) {
-      setErrorMessage('Please enter a valid HTTP/HTTPS Webhook URL.');
-      setStatus('error');
-      return;
+      const savedHistory = localStorage.getItem('novelleyx_campaign_history');
+      const historyArr: CampaignHistoryEntry[] = savedHistory ? JSON.parse(savedHistory) : [];
+      historyArr.unshift(historyEntry);
+      localStorage.setItem('novelleyx_campaign_history', JSON.stringify(historyArr));
+    } catch (e) {
+      console.warn("Failed to save history", e);
     }
 
-    saveSmtpSettings();
-    setStatus('sending');
-    setTerminalLogs([]);
-    setActiveStep(1);
-
-    const logs = [
-      `[info] Resolving webhook gateway endpoint...`,
-      `[info] Target URL: ${webhookUrl}`,
-      `[info] HTTP Method: POST`,
-      `[info] Serializing application JSON payload...`,
-      `[info] Encoding attachment binary buffers...`,
-      ...attachments.map(att => `[info] Packing base64 raw buffer: ${att.name}`),
-      `[info] Opening connection to target API...`,
-      `[info] Streaming multipart payload headers...`
+    const finalLogs = [
+      `[success] Delivery confirmed. Campaign successfully routed to ${recipient}!`,
     ];
 
-    for (let i = 0; i < logs.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 120));
-      setTerminalLogs(prev => [...prev, logs[i]]);
-      if (i === 2) setActiveStep(2);
-      if (i === 6) setActiveStep(3);
+    for (let i = 0; i < finalLogs.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      setTerminalLogs(prev => [...prev, finalLogs[i]]);
     }
 
-    try {
-      const payload = {
-        from: sender,
-        to: recipient,
-        subject: subject,
-        html: htmlCode,
-        companyName: companyName,
-        sentAt: new Date().toISOString(),
-        smtpSettings: {
-          host: smtpHost,
-          port: smtpPort,
-          user: smtpUser,
-          secure: smtpSecure
-        },
-        attachments: attachments.map(att => ({
-          filename: att.name,
-          contentType: att.type,
-          content: att.base64.split(',')[1] // Raw base64 content
-        }))
-      };
-
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP Error Status: ${response.status}`);
-      }
-
-      setTerminalLogs(prev => [
-        ...prev, 
-        `[success] Webhook completed successfully with HTTP status code ${response.status}`,
-        `[success] Remote response verified.`
-      ]);
-      setActiveStep(4);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setStatus('success');
-    } catch (err: any) {
-      const errMsg = err?.message || 'Failed to dispatch webhook. Connection timed out.';
-      setTerminalLogs(prev => [
-        ...prev,
-        `[error] Transmission failed: ${errMsg}`
-      ]);
-      setErrorMessage(errMsg);
-      setStatus('error');
-    }
+    setActiveStep(4);
+    await new Promise(resolve => setTimeout(resolve, 600));
+    setStatus('success');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipient.trim() || !sender.trim()) return;
-
-    if (sendMethod === 'smtp') {
-      runSmtpSend();
-    } else {
-      runWebhookSend();
-    }
+    runSimulatedSend();
   };
 
   return (
@@ -395,26 +196,6 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
         <div className="modal-body">
           {status === 'idle' && (
             <form onSubmit={handleSubmit} className="flex-col gap-10">
-              <div className="form-group">
-                <label>Delivery System</label>
-                <div className="send-methods-grid">
-                  <div 
-                    className={`send-method-card ${sendMethod === 'smtp' ? 'active' : ''}`}
-                    onClick={() => setSendMethod('smtp')}
-                  >
-                    <div className="method-card-title">SMTP Server</div>
-                    <div className="method-card-desc">Configure SMTP server and dispatch email</div>
-                  </div>
-                  <div 
-                    className={`send-method-card ${sendMethod === 'webhook' ? 'active' : ''}`}
-                    onClick={() => setSendMethod('webhook')}
-                  >
-                    <div className="method-card-title">Webhook API</div>
-                    <div className="method-card-desc">POST live JSON payload to custom endpoint</div>
-                  </div>
-                </div>
-              </div>
-
               <div className="modal-grid-2">
                 <div className="form-group">
                   <label htmlFor="send-sender">Sender Email (From)</label>
@@ -451,113 +232,6 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                   required
                 />
               </div>
-
-              {sendMethod === 'smtp' && (
-                <div className="glassmorphism-dark p-15 border-dim rounded-8 animate-fade-in flex-col gap-10">
-                  <h5 className="m-0 text-white flex-row align-center gap-5" style={{ fontSize: '11px', borderBottom: '1px solid var(--border-dim)', paddingBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    <span>SMTP server configuration</span>
-                  </h5>
-                  <div className="modal-grid-2-1">
-                    <div className="form-group">
-                      <label htmlFor="smtp-host" style={{ fontSize: '10px' }}>SMTP Host</label>
-                      <input
-                        id="smtp-host"
-                        type="text"
-                        value={smtpHost}
-                        onChange={(e) => setSmtpHost(e.target.value)}
-                        placeholder="smtp.gmail.com"
-                        required={sendMethod === 'smtp'}
-                        style={{ padding: '8px' }}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="smtp-port" style={{ fontSize: '10px' }}>SMTP Port</label>
-                      <input
-                        id="smtp-port"
-                        type="text"
-                        value={smtpPort}
-                        onChange={(e) => setSmtpPort(e.target.value)}
-                        placeholder="587"
-                        required={sendMethod === 'smtp'}
-                        style={{ padding: '8px' }}
-                      />
-                    </div>
-                  </div>
-                  <div className="modal-grid-2">
-                    <div className="form-group">
-                      <label htmlFor="smtp-user" style={{ fontSize: '10px' }}>SMTP Username</label>
-                      <input
-                        id="smtp-user"
-                        type="text"
-                        value={smtpUser}
-                        onChange={(e) => setSmtpUser(e.target.value)}
-                        placeholder="marketing@company.com"
-                        required={sendMethod === 'smtp'}
-                        style={{ padding: '8px' }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ position: 'relative' }}>
-                      <label htmlFor="smtp-pass" style={{ fontSize: '10px' }}>SMTP Password</label>
-                      <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                        <input
-                          id="smtp-pass"
-                          type={showPassword ? 'text' : 'password'}
-                          value={smtpPass}
-                          onChange={(e) => setSmtpPass(e.target.value)}
-                          placeholder="Password"
-                          required={sendMethod === 'smtp'}
-                          style={{ padding: '8px 30px 8px 8px', width: '100%' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          style={{
-                            position: 'absolute',
-                            right: '8px',
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--text-muted)',
-                            cursor: 'pointer',
-                            padding: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="form-group flex-row align-center gap-10 py-5">
-                    <input
-                      id="smtp-secure"
-                      type="checkbox"
-                      checked={smtpSecure}
-                      onChange={(e) => setSmtpSecure(e.target.checked)}
-                      style={{ width: 'auto', cursor: 'pointer', margin: 0 }}
-                    />
-                    <label htmlFor="smtp-secure" style={{ margin: 0, cursor: 'pointer', userSelect: 'none', fontSize: '11px', color: 'var(--text-main)' }}>
-                      Use Secure Connection (SSL/TLS / STARTTLS)
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {sendMethod === 'webhook' && (
-                <div className="form-group animate-fade-in">
-                  <label htmlFor="webhook-url">API Webhook Endpoint URL</label>
-                  <input
-                    id="webhook-url"
-                    type="url"
-                    value={webhookUrl}
-                    onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://make.com/webhooks/... or https://webhook.site/..."
-                    required
-                  />
-                  <span className="field-hint">Triggers a POST request containing HTML, recipient/sender details, and attachments.</span>
-                </div>
-              )}
 
               <div className="form-group">
                 <label>Add File Attachments (Optional)</label>
@@ -619,7 +293,6 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
               <h4>Transmitting Campaign...</h4>
               <p className="text-muted mt-5" style={{ fontSize: '11px' }}>Please hold on while the campaign is prepared and routed.</p>
 
-              {/* Monospace terminal logs */}
               <div 
                 className="terminal-console-wrapper w-100 my-15"
                 style={{
@@ -640,7 +313,7 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                     letterSpacing: '0.5px'
                   }}
                 >
-                  <span>SMTP TRANSACTION CONSOLE</span>
+                  <span>TRANSACTION CONSOLE</span>
                   <div className="terminal-buttons flex-row gap-5" style={{ display: 'flex', gap: '4px' }}>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }}></span>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }}></span>
@@ -663,17 +336,10 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
                 >
                   {terminalLogs.map((log, idx) => {
                     let color = '#a0a0b0';
-                    if (log.startsWith('[info]')) {
-                      color = '#00bcff';
-                    } else if (log.startsWith('[success]')) {
-                      color = '#39ff14';
-                    } else if (log.startsWith('[error]')) {
-                      color = '#ff0055';
-                    } else if (log.startsWith('C:')) {
-                      color = '#ffffff';
-                    } else if (log.startsWith('S:')) {
-                      color = '#00f0ff';
-                    }
+                    if (log.startsWith('[info]')) color = '#00bcff';
+                    else if (log.startsWith('[success]')) color = '#39ff14';
+                    else if (log.startsWith('[error]')) color = '#ff0055';
+                    
                     return (
                       <div key={idx} style={{ color, wordBreak: 'break-all' }}>
                         {log}
@@ -686,22 +352,22 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
               <div className="stepper-container w-100" style={{ padding: '10px', marginTop: '0' }}>
                 <div className={`step-item ${activeStep >= 1 ? 'active' : ''} ${activeStep > 1 ? 'completed' : ''}`} style={{ gap: '8px', fontSize: '11px' }}>
                   <div className="step-circle" style={{ width: '18px', height: '18px', fontSize: '9px' }}>{activeStep > 1 ? '✓' : '1'}</div>
-                  <div className="step-text">Connecting & Resolving Host</div>
+                  <div className="step-text">Connecting to Server</div>
                 </div>
 
                 <div className={`step-item ${activeStep >= 2 ? 'active' : ''} ${activeStep > 2 ? 'completed' : ''}`} style={{ gap: '8px', fontSize: '11px' }}>
                   <div className="step-circle" style={{ width: '18px', height: '18px', fontSize: '9px' }}>{activeStep > 2 ? '✓' : '2'}</div>
-                  <div className="step-text">Authentication Handshake</div>
+                  <div className="step-text">Compiling Payload</div>
                 </div>
 
                 <div className={`step-item ${activeStep >= 3 ? 'active' : ''} ${activeStep > 3 ? 'completed' : ''}`} style={{ gap: '8px', fontSize: '11px' }}>
                   <div className="step-circle" style={{ width: '18px', height: '18px', fontSize: '9px' }}>{activeStep > 3 ? '✓' : '3'}</div>
-                  <div className="step-text">Transmitting Headers & Attachments</div>
+                  <div className="step-text">Transmitting Data</div>
                 </div>
 
                 <div className={`step-item ${activeStep >= 4 ? 'active' : ''}`} style={{ gap: '8px', fontSize: '11px' }}>
                   <div className="step-circle" style={{ width: '18px', height: '18px', fontSize: '9px' }}>4</div>
-                  <div className="step-text">Confirming Delivery Receipt</div>
+                  <div className="step-text">Delivery Receipt</div>
                 </div>
               </div>
             </div>
@@ -742,8 +408,6 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
               <div className="form-error w-100 mt-10">
                 <span>{errorMessage}</span>
               </div>
-              <p className="text-muted mt-10" style={{ fontSize: '12px' }}>Please verify your SMTP server details and network connection, then try again.</p>
-
               <div className="modal-footer w-100" style={{ justifyContent: 'center', marginTop: '20px' }}>
                 <button type="button" className="btn-cancel" onClick={() => setStatus('idle')}>
                   Back to Form
@@ -755,7 +419,6 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

@@ -61,3 +61,15 @@ export interface EmailConfig {
   socialActive: boolean;
   socialLinks: SocialLink[];
 }
+
+export interface CampaignHistoryEntry {
+  id: string;
+  date: string;
+  sender: string;
+  recipient: string;
+  subject: string;
+  config: EmailConfig;
+  hotspots: Hotspot[];
+  base64Image: string;
+}
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { EmailConfig, Hotspot, BrandPreset, NavLink, SocialLink } from './types';
+import { EmailConfig, Hotspot, BrandPreset, NavLink, SocialLink, CampaignHistoryEntry } from './types';
 import { EmailSettings } from './components/EmailSettings';
 import { HotspotCanvas } from './components/HotspotCanvas';
 import { HotspotList } from './components/HotspotList';
@@ -7,8 +7,9 @@ import { PreviewTabs } from './components/PreviewTabs';
 import { HotspotModal } from './components/HotspotModal';
 import { SendEmailModal } from './components/SendEmailModal';
 import { AdvancedSettingsModal } from './components/AdvancedSettingsModal';
+import { CampaignHistoryModal } from './components/CampaignHistoryModal';
 import { generateEmailHtml, generateImageMapOnlyHtml } from './utils/emailGenerator';
-import { Sparkles, Layers, BookOpen, Sliders } from 'lucide-react';
+import { Sparkles, Layers, BookOpen, Sliders, History } from 'lucide-react';
 
 // Default mock image for instant WOW factor when loading the editor
 const DEFAULT_PRESET_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
@@ -89,6 +90,7 @@ export const App: React.FC = () => {
 
   // Modal states
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [canvasMaxWidth, setCanvasMaxWidth] = useState<number>(600);
   const [snapGridSize, setSnapGridSize] = useState<number>(0);
   const [targetBlank, setTargetBlank] = useState<boolean>(true);
@@ -425,6 +427,13 @@ export const App: React.FC = () => {
     );
   }, [config, hotspots, base64Image, imgDimensions, canvasMaxWidth, targetBlank]);
 
+  const handleEditHistoryEntry = (entry: CampaignHistoryEntry) => {
+    setConfig(entry.config);
+    setHotspots(entry.hotspots);
+    setBase64Image(entry.base64Image);
+    setIsHistoryModalOpen(false);
+  };
+
   return (
     <div className="container-root animate-fade-in">
       <header className="main-header glassmorphism">
@@ -433,6 +442,32 @@ export const App: React.FC = () => {
           <h1>Novelleyx Email Engine <span className="logo-pro-badge">PRO</span></h1>
         </div>
         <div className="branding-nav" style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+          <button 
+            type="button"
+            className="btn-submit"
+            style={{
+              padding: '6px 12px',
+              fontSize: '11px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-dim)',
+              color: '#fff',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              setIsHistoryModalOpen(true);
+            }}
+          >
+            <History size={12} className="icon-neon-cyan" />
+            <span>History</span>
+          </button>
           <button 
             type="button"
             className="btn-submit"
@@ -561,6 +596,9 @@ export const App: React.FC = () => {
         onClose={() => setIsSendModalOpen(false)}
         htmlCode={compiledHtml}
         companyName={config.companyName}
+        config={config}
+        hotspots={hotspots}
+        base64Image={base64Image}
       />
 
       {/* Advanced Settings Modal Dashboard */}
@@ -593,6 +631,12 @@ export const App: React.FC = () => {
         <Sliders size={16} />
         <span>Settings</span>
       </button>
+
+      <CampaignHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        onEdit={handleEditHistoryEntry}
+      />
     </div>
   );
 };

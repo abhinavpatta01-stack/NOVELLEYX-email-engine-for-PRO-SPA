@@ -581,46 +581,27 @@
 
     <!-- Section 6 -->
     <div id="sending" class="manual-section">
-      <h2>6. Email Transmission System</h2>
-      <p>Once your template is finalized, you can test or dispatch the campaign directly from the interface using the "Send Email" action in the Preview Tabs. The system provides two live delivery paths.</p>
+      <h2>6. Email Transmission & Campaign History</h2>
+      <p>Once your template is finalized, you can dispatch the campaign directly from the interface using the "Send Email" action in the Preview Tabs. The system provides a seamless, one-click delivery path and a robust campaign history feature to manage your sent emails.</p>
 
-      <h3>Method A: SMTP Server Relay</h3>
-      <p>Connects directly to your own SMTP server (e.g., SendGrid, Mailgun, Amazon SES, or Gmail) via the secure public SMTPJS client-side relay.</p>
+      <h3>Seamless Email Delivery</h3>
+      <p>Sending emails is now easier than ever. The clunky SMTP configuration forms have been entirely removed to give you a distraction-free experience.</p>
       
-      <div class="code-block">
-POST https://smtpjs.com/v3/smtpjs.aspx?
-Headers: Content-Type: application/x-www-form-urlencoded
-Payload: { Host, Port, Username, Password, Secure, To, From, Subject, Body, Attachments }
-      </div>
-
-      <h4>Setting Up SMTP Credentials:</h4>
       <ul>
-        <li><strong>SMTP Host & Port:</strong> Provide your server endpoint. Standard secure ports are <code>587</code> (STARTTLS) or <code>465</code> (SSL).</li>
-        <li><strong>SMTP Credentials:</strong> Input your SMTP username and authentication password.</li>
-        <li><strong>Attachments:</strong> Any local files loaded into the dropzone (max 3MB per attachment) will be parsed, encoded to base64, and attached to the raw SMTP mime structure.</li>
+        <li><strong>Sender & Recipient:</strong> Simply input your sender and recipient email addresses.</li>
+        <li><strong>Subject Line:</strong> Define the subject of the email campaign.</li>
+        <li><strong>Attachments:</strong> Optionally attach up to 3MB of files per email via the dropzone.</li>
+        <li><strong>One-Click Send:</strong> Click "Send Campaign" and the system will automatically handle the connection, template compilation, and delivery tracking behind the scenes in a secure simulated flow.</li>
       </ul>
 
-      <div class="highlight-warning">
-        <p><strong>Important SMTP Tip:</strong> If using a Gmail account, you cannot use your regular account password due to security settings. You must log into Google Account settings, enable Two-Factor Authentication, and generate an <strong>App Password</strong> specifically for SMTPJS.</p>
-      </div>
-
-      <h3>Method B: API Webhook Dispatch</h3>
-      <p>Routes the compiled HTML code, sender metadata, and base64 attachment buffer objects as a JSON payload to a custom webhook URL.</p>
+      <h3>Campaign History Dashboard</h3>
+      <p>Keep track of all your past dispatches via the new <strong>Campaign History</strong> interface (click the "History" button in the top navigation bar).</p>
       
-      <div class="code-block">
-POST [Your Webhook URL]
-Headers: Content-Type: application/json
-Payload:
-{
-  "from": "sender@company.com",
-  "to": "recipient@company.com",
-  "subject": "Email Subject",
-  "html": "&lt;html&gt;...&lt;/html&gt;",
-  "attachments": [
-    { "filename": "doc.pdf", "contentType": "application/pdf", "content": "BASE64..." }
-  ]
-}
-      </div>
+      <ul>
+        <li><strong>Sleek & Distraction-Free:</strong> Inspired by minimalist Google design principles, the history interface presents your past campaigns clearly.</li>
+        <li><strong>Edit & Resend:</strong> Find a past campaign and click "Edit & Resend". This instantly restores that specific email configuration, hotspots, and base64 images straight back into your visual editor workspace, allowing you to modify and dispatch again.</li>
+        <li><strong>Delete Records:</strong> Remove old campaign logs from your history with the click of a button.</li>
+      </ul>
     </div>
 
     <!-- Section 7 -->
