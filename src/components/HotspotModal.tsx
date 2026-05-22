@@ -128,7 +128,7 @@ export const HotspotModal: React.FC<HotspotModalProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  step="0.5"
+                  step="any"
                   value={left}
                   onChange={(e) => setLeft(parseFloat(parseFloat(e.target.value).toFixed(2)) || 0)}
                 />
@@ -139,7 +139,7 @@ export const HotspotModal: React.FC<HotspotModalProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  step="0.5"
+                  step="any"
                   value={top}
                   onChange={(e) => setTop(parseFloat(parseFloat(e.target.value).toFixed(2)) || 0)}
                 />
@@ -153,7 +153,7 @@ export const HotspotModal: React.FC<HotspotModalProps> = ({
                   type="number"
                   min="1"
                   max="100"
-                  step="0.5"
+                  step="any"
                   value={width}
                   onChange={(e) => setWidth(parseFloat(parseFloat(e.target.value).toFixed(2)) || 0)}
                 />
@@ -164,7 +164,7 @@ export const HotspotModal: React.FC<HotspotModalProps> = ({
                   type="number"
                   min="1"
                   max="100"
-                  step="0.5"
+                  step="any"
                   value={height}
                   onChange={(e) => setHeight(parseFloat(parseFloat(e.target.value).toFixed(2)) || 0)}
                 />
